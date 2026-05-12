@@ -16,7 +16,7 @@ const EXAMPLE_QUERIES = [
   'the feeling of brotherhood',
   'the weight of a decision',
   'the way time slows when it matters',
-  'the soft arrival of an unexpected joy',
+  'the silence inside something enormous',
   'walking through a place that knew you first',
 ];
 
