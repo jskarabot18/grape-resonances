@@ -1,0 +1,25 @@
+{
+  "_metadata": {
+    "schema_version": "v1",
+    "completed": "2026-05-10",
+    "purpose": "Framing copy for Grape Resonances responses. Bullseye framings used when matched regions fall predominantly in one cluster; prism framings used when matched regions span multiple clusters.",
+    "selection_rule": "Per Planning Doc 'Aggregator selection rule' (locked 2026-05-10): bullseye if ≥4 of N matched regions share a cluster; prism otherwise.",
+    "voice_register": "Soul of Wine, oracular — read first by the user, one sentence, character-led.",
+    "n_clusters": 6,
+    "n_prism_framings": 4
+  },
+  "bullseye_framings": {
+    "Old World Interior": "Your word points to the patient, custodial cultures — places where time is the essential ingredient and the winemaker is a keeper, not a maker.",
+    "Outward Ease": "Your word points to the communal cultures — places where wine is part of the table, the market, the gathering, never separate from the company it keeps.",
+    "Old World Exterior": "Your word points to the cultures of inheritance — places where wine is part of how the society organises itself: through family, through trade, through patience, through the long table.",
+    "Against the Odds": "Your word points to the cultures of endurance — places where difficulty is not an obstacle but the substance.",
+    "New World Reinvention": "Your word points to the cultures of conviction-without-evidence — places that decided they should exist and then made themselves.",
+    "The Moderates": "Your word points to the cultures of found voice — places that arrived at their own centre, each by a different route, none by choosing the loudest register."
+  },
+  "prism_framings": {
+    "prism_general": "Your word refracts. In this framework's reading, it is not one feeling but several — the regions your phrase pulls belong to different temperaments, each holding a facet of what you brought.",
+    "prism_interior_reinvention": "Your word holds a tension between patient inheritance and chosen invention — wine cultures that arrived at depth by very different routes.",
+    "prism_difficulty_ease": "Your word holds a tension between difficulty and ease — wine cultures that found themselves under pressure beside cultures that found themselves at the table.",
+    "prism_interior_moderate": "Your word holds a tension between the cultures of long depth and the cultures of found equilibrium — different settlements of the same question about how to make wine seriously."
+  }
+}

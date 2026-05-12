@@ -1,0 +1,1192 @@
+{
+  "_metadata": {
+    "purpose": "Curated grape associations for the 59 Vinotheca regions, used by Grape Resonances to map matched regions to grape recommendations.",
+    "curation_rules": {
+      "tier_definitions": {
+        "signature": "What the region is famous for; the grape any wine-curious reader already associates with the place.",
+        "lesser_known": "Recognized by occasional readers but not the obvious answer. Tier from which temperament_seconds is drawn.",
+        "rare": "Even moderately serious enthusiasts haven't heard of these. Up to 4 entries when deeper cuts exist; may be empty for regions without rare answers.",
+        "temperament_seconds": "The lesser-known grape from this region that most embodies the region's identity. Always a subset of lesser_known. Used by the cluster-level aggregator. Curatorial principle: tiers are region-relative (what the region keeps), not market-relative (what the global market notices)."
+      },
+      "parentheticals": "Allowed for disambiguation when a grape name alone is ambiguous (e.g. 'Gamay (Hautes-Côtes)').",
+      "asymmetry": "Some regions (Walla Walla, parts of New Zealand) lack natural Tier 2 candidates because they grow mostly international varieties. Such regions get an empty temperament_seconds; the aggregator does not force a Tier 2 grape per region."
+    },
+    "schema_version": "v1",
+    "started": "2026-05-10",
+    "n_regions_total": 59,
+    "curation_order": "cluster-by-cluster, starting with Old World Interior",
+    "n_regions_curated": 59,
+    "completion_date": "2026-05-10"
+  },
+  "Burgundy": {
+    "signature": [
+      "Pinot Noir",
+      "Chardonnay"
+    ],
+    "lesser_known": [
+      "Aligoté",
+      "Gamay (Hautes-Côtes)"
+    ],
+    "rare": [
+      "Sacy",
+      "César",
+      "Pinot Beurot",
+      "Tressot"
+    ],
+    "temperament_seconds": [
+      "Aligoté"
+    ]
+  },
+  "Northern Rhône": {
+    "signature": [
+      "Syrah",
+      "Viognier"
+    ],
+    "lesser_known": [
+      "Marsanne",
+      "Roussanne"
+    ],
+    "rare": [],
+    "temperament_seconds": [
+      "Marsanne"
+    ]
+  },
+  "Mosel": {
+    "signature": [
+      "Riesling"
+    ],
+    "lesser_known": [
+      "Elbling",
+      "Müller-Thurgau"
+    ],
+    "rare": [
+      "Auxerrois"
+    ],
+    "temperament_seconds": [
+      "Elbling"
+    ]
+  },
+  "Rheingau": {
+    "signature": [
+      "Riesling"
+    ],
+    "lesser_known": [
+      "Spätburgunder",
+      "Weissburgunder"
+    ],
+    "rare": [
+      "Frühburgunder"
+    ],
+    "temperament_seconds": [
+      "Spätburgunder"
+    ]
+  },
+  "Tokaj": {
+    "signature": [
+      "Furmint"
+    ],
+    "lesser_known": [
+      "Hárslevelű",
+      "Sárga Muskotály"
+    ],
+    "rare": [
+      "Kabar",
+      "Zéta",
+      "Kövérszőlő"
+    ],
+    "temperament_seconds": [
+      "Hárslevelű"
+    ]
+  },
+  "Campania": {
+    "signature": [
+      "Aglianico",
+      "Fiano",
+      "Greco di Tufo"
+    ],
+    "lesser_known": [
+      "Falanghina",
+      "Piedirosso",
+      "Coda di Volpe"
+    ],
+    "rare": [
+      "Pallagrello Bianco",
+      "Pallagrello Nero",
+      "Casavecchia",
+      "Asprinio"
+    ],
+    "temperament_seconds": [
+      "Piedirosso"
+    ]
+  },
+  "Etna": {
+    "signature": [
+      "Nerello Mascalese",
+      "Carricante"
+    ],
+    "lesser_known": [
+      "Nerello Cappuccio",
+      "Catarratto"
+    ],
+    "rare": [
+      "Minnella Bianca",
+      "Grecanico Dorato"
+    ],
+    "temperament_seconds": [
+      "Nerello Cappuccio"
+    ]
+  },
+  "Piedmont": {
+    "signature": [
+      "Nebbiolo"
+    ],
+    "lesser_known": [
+      "Barbera",
+      "Dolcetto",
+      "Cortese",
+      "Arneis",
+      "Moscato Bianco",
+      "Freisa"
+    ],
+    "rare": [
+      "Grignolino",
+      "Ruchè",
+      "Pelaverga"
+    ],
+    "temperament_seconds": [
+      "Freisa"
+    ]
+  },
+  "Galicia": {
+    "signature": [
+      "Albariño",
+      "Mencía",
+      "Godello"
+    ],
+    "lesser_known": [
+      "Treixadura",
+      "Loureira",
+      "Caíño Tinto"
+    ],
+    "rare": [
+      "Brancellao",
+      "Merenzao",
+      "Sousón",
+      "Espadeiro"
+    ],
+    "temperament_seconds": [
+      "Treixadura"
+    ]
+  },
+  "Santa Cruz Mountains": {
+    "signature": [
+      "Pinot Noir",
+      "Cabernet Sauvignon"
+    ],
+    "lesser_known": [
+      "Chardonnay",
+      "Zinfandel"
+    ],
+    "rare": [
+      "Cabernet Franc"
+    ],
+    "temperament_seconds": [
+      "Zinfandel"
+    ]
+  },
+  "Beaujolais": {
+    "signature": [
+      "Gamay"
+    ],
+    "lesser_known": [
+      "Chardonnay",
+      "Aligoté"
+    ],
+    "rare": [
+      "Melon"
+    ],
+    "temperament_seconds": []
+  },
+  "Provence": {
+    "signature": [
+      "Grenache"
+    ],
+    "lesser_known": [
+      "Cinsault",
+      "Mourvèdre",
+      "Rolle (Vermentino)",
+      "Tibouren"
+    ],
+    "rare": [
+      "Calitor",
+      "Counoise",
+      "Clairette",
+      "Bourboulenc"
+    ],
+    "temperament_seconds": [
+      "Cinsault"
+    ]
+  },
+  "Veneto": {
+    "signature": [
+      "Glera",
+      "Garganega",
+      "Corvina"
+    ],
+    "lesser_known": [
+      "Pinot Grigio",
+      "Rondinella",
+      "Trebbiano di Soave",
+      "Corvinone"
+    ],
+    "rare": [
+      "Molinara",
+      "Oseleta",
+      "Rossignola",
+      "Negrara"
+    ],
+    "temperament_seconds": [
+      "Pinot Grigio"
+    ]
+  },
+  "Marlborough": {
+    "signature": [
+      "Sauvignon Blanc"
+    ],
+    "lesser_known": [
+      "Pinot Noir",
+      "Chardonnay"
+    ],
+    "rare": [
+      "Pinot Gris",
+      "Riesling"
+    ],
+    "temperament_seconds": []
+  },
+  "Walla Walla": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Syrah"
+    ],
+    "lesser_known": [
+      "Merlot",
+      "Cabernet Franc",
+      "Grenache",
+      "Sangiovese"
+    ],
+    "rare": [
+      "Tempranillo",
+      "Petit Verdot",
+      "Mourvèdre"
+    ],
+    "temperament_seconds": [
+      "Merlot"
+    ]
+  },
+  "Dalmatian Coast": {
+    "signature": [
+      "Plavac Mali",
+      "Pošip"
+    ],
+    "lesser_known": [
+      "Babić",
+      "Maraština",
+      "Plavina"
+    ],
+    "rare": [
+      "Crljenak Kaštelanski",
+      "Dobričić",
+      "Vugava",
+      "Grk"
+    ],
+    "temperament_seconds": [
+      "Babić"
+    ]
+  },
+  "Bordeaux": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Merlot",
+      "Cabernet Franc"
+    ],
+    "lesser_known": [
+      "Sauvignon Blanc",
+      "Sémillon",
+      "Petit Verdot"
+    ],
+    "rare": [
+      "Malbec",
+      "Carmenère",
+      "Muscadelle",
+      "Colombard"
+    ],
+    "temperament_seconds": [
+      "Sémillon"
+    ]
+  },
+  "Champagne": {
+    "signature": [
+      "Pinot Noir",
+      "Chardonnay",
+      "Pinot Meunier"
+    ],
+    "lesser_known": [
+      "Pinot Blanc",
+      "Pinot Gris (Fromenteau)"
+    ],
+    "rare": [
+      "Petit Meslier",
+      "Arbane"
+    ],
+    "temperament_seconds": [
+      "Pinot Gris (Fromenteau)"
+    ]
+  },
+  "Châteauneuf-du-Pape": {
+    "signature": [
+      "Grenache",
+      "Syrah",
+      "Mourvèdre"
+    ],
+    "lesser_known": [
+      "Cinsault",
+      "Counoise",
+      "Roussanne",
+      "Grenache Blanc"
+    ],
+    "rare": [
+      "Vaccarèse",
+      "Terret Noir",
+      "Muscardin",
+      "Picardan"
+    ],
+    "temperament_seconds": [
+      "Counoise"
+    ]
+  },
+  "Baden": {
+    "signature": [
+      "Spätburgunder",
+      "Grauburgunder",
+      "Weissburgunder"
+    ],
+    "lesser_known": [
+      "Gutedel",
+      "Riesling"
+    ],
+    "rare": [
+      "Silvaner",
+      "Schwarzriesling",
+      "Lemberger"
+    ],
+    "temperament_seconds": [
+      "Gutedel"
+    ]
+  },
+  "Pfalz": {
+    "signature": [
+      "Riesling",
+      "Spätburgunder"
+    ],
+    "lesser_known": [
+      "Dornfelder",
+      "Grauburgunder",
+      "Weissburgunder"
+    ],
+    "rare": [
+      "Scheurebe",
+      "Gewürztraminer",
+      "Sankt Laurent"
+    ],
+    "temperament_seconds": [
+      "Dornfelder"
+    ]
+  },
+  "Rioja": {
+    "signature": [
+      "Tempranillo"
+    ],
+    "lesser_known": [
+      "Garnacha",
+      "Graciano",
+      "Mazuelo",
+      "Viura"
+    ],
+    "rare": [
+      "Maturana Tinta",
+      "Maturana Blanca",
+      "Tempranillo Blanco",
+      "Turruntés"
+    ],
+    "temperament_seconds": [
+      "Graciano"
+    ]
+  },
+  "Wagram": {
+    "signature": [
+      "Grüner Veltliner"
+    ],
+    "lesser_known": [
+      "Roter Veltliner",
+      "Riesling",
+      "Zweigelt"
+    ],
+    "rare": [
+      "Frühroter Veltliner",
+      "Neuburger",
+      "Rotgipfler"
+    ],
+    "temperament_seconds": [
+      "Roter Veltliner"
+    ]
+  },
+  "Jura": {
+    "signature": [
+      "Savagnin",
+      "Chardonnay",
+      "Poulsard"
+    ],
+    "lesser_known": [
+      "Trousseau",
+      "Pinot Noir"
+    ],
+    "rare": [
+      "Béclan",
+      "Gueuche Noir",
+      "Argant"
+    ],
+    "temperament_seconds": [
+      "Trousseau"
+    ]
+  },
+  "Macedonia": {
+    "signature": [
+      "Xinomavro"
+    ],
+    "lesser_known": [
+      "Assyrtiko",
+      "Malagouzia"
+    ],
+    "rare": [
+      "Limnio",
+      "Negoska",
+      "Roditis"
+    ],
+    "temperament_seconds": [
+      "Assyrtiko"
+    ]
+  },
+  "Santorini": {
+    "signature": [
+      "Assyrtiko"
+    ],
+    "lesser_known": [
+      "Athiri",
+      "Aidani"
+    ],
+    "rare": [
+      "Mavrotragano",
+      "Mandilaria",
+      "Voudomato"
+    ],
+    "temperament_seconds": [
+      "Aidani"
+    ]
+  },
+  "Liguria": {
+    "signature": [
+      "Pigato",
+      "Vermentino",
+      "Rossese"
+    ],
+    "lesser_known": [
+      "Bosco",
+      "Albarola",
+      "Ormeasco"
+    ],
+    "rare": [
+      "Pollera Nera",
+      "Bonamico",
+      "Lumassina"
+    ],
+    "temperament_seconds": [
+      "Bosco"
+    ]
+  },
+  "Sardinia": {
+    "signature": [
+      "Cannonau",
+      "Vermentino",
+      "Carignano"
+    ],
+    "lesser_known": [
+      "Vernaccia di Oristano",
+      "Nuragus",
+      "Monica",
+      "Bovale"
+    ],
+    "rare": [
+      "Torbato",
+      "Nasco",
+      "Semidano",
+      "Girò"
+    ],
+    "temperament_seconds": [
+      "Vernaccia di Oristano"
+    ]
+  },
+  "Douro": {
+    "signature": [
+      "Touriga Nacional",
+      "Touriga Franca",
+      "Tinta Roriz"
+    ],
+    "lesser_known": [
+      "Tinta Barroca",
+      "Tinto Cão",
+      "Sousão",
+      "Gouveio"
+    ],
+    "rare": [
+      "Tinta Amarela",
+      "Viosinho",
+      "Rabigato",
+      "Códega do Larinho"
+    ],
+    "temperament_seconds": [
+      "Tinto Cão"
+    ]
+  },
+  "Ribera del Duero": {
+    "signature": [
+      "Tinto Fino"
+    ],
+    "lesser_known": [
+      "Cabernet Sauvignon",
+      "Garnacha",
+      "Albillo"
+    ],
+    "rare": [
+      "Merlot",
+      "Malbec"
+    ],
+    "temperament_seconds": [
+      "Albillo"
+    ]
+  },
+  "Barossa Valley": {
+    "signature": [
+      "Shiraz"
+    ],
+    "lesser_known": [
+      "Grenache",
+      "Mataro",
+      "Riesling",
+      "Cabernet Sauvignon"
+    ],
+    "rare": [
+      "Semillon (Eden Valley)",
+      "Pedro Ximénez"
+    ],
+    "temperament_seconds": [
+      "Grenache"
+    ]
+  },
+  "Hunter Valley": {
+    "signature": [
+      "Semillon (Hunter Valley)",
+      "Shiraz"
+    ],
+    "lesser_known": [
+      "Chardonnay",
+      "Verdelho"
+    ],
+    "rare": [
+      "Cabernet Sauvignon",
+      "Pinot Noir"
+    ],
+    "temperament_seconds": [
+      "Verdelho"
+    ]
+  },
+  "Sicily": {
+    "signature": [
+      "Nero d'Avola",
+      "Grillo"
+    ],
+    "lesser_known": [
+      "Frappato",
+      "Inzolia",
+      "Catarratto",
+      "Perricone"
+    ],
+    "rare": [
+      "Nocera",
+      "Grecanico Dorato",
+      "Zibibbo (Moscato d'Alessandria)",
+      "Carricante (western)"
+    ],
+    "temperament_seconds": [
+      "Perricone"
+    ]
+  },
+  "Catalonia": {
+    "signature": [
+      "Garnatxa (Grenache)",
+      "Carinyena (Carignan)",
+      "Macabeu"
+    ],
+    "lesser_known": [
+      "Xarel·lo",
+      "Parellada",
+      "Trepat",
+      "Sumoll"
+    ],
+    "rare": [
+      "Picapoll Negre",
+      "Garró",
+      "Mandó",
+      "Garnatxa Peluda"
+    ],
+    "temperament_seconds": [
+      "Xarel·lo"
+    ]
+  },
+  "Mendoza": {
+    "signature": [
+      "Malbec",
+      "Cabernet Sauvignon"
+    ],
+    "lesser_known": [
+      "Cabernet Franc",
+      "Bonarda",
+      "Chardonnay"
+    ],
+    "rare": [
+      "Criolla Chica",
+      "Cereza",
+      "Torrontés Riojano",
+      "Moscatel Rosado"
+    ],
+    "temperament_seconds": [
+      "Cabernet Franc"
+    ]
+  },
+  "Patagonia": {
+    "signature": [
+      "Pinot Noir",
+      "Malbec"
+    ],
+    "lesser_known": [
+      "Merlot",
+      "Chardonnay",
+      "Sauvignon Blanc",
+      "Sémillon"
+    ],
+    "rare": [
+      "Trousseau",
+      "Gewürztraminer",
+      "Riesling",
+      "Pinot Gris"
+    ],
+    "temperament_seconds": [
+      "Sémillon"
+    ]
+  },
+  "Central Otago": {
+    "signature": [
+      "Pinot Noir"
+    ],
+    "lesser_known": [
+      "Pinot Gris",
+      "Riesling",
+      "Chardonnay"
+    ],
+    "rare": [
+      "Grüner Veltliner",
+      "Gamay",
+      "Sauvignon Blanc"
+    ],
+    "temperament_seconds": []
+  },
+  "Stellenbosch": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Chenin Blanc"
+    ],
+    "lesser_known": [
+      "Pinotage",
+      "Syrah",
+      "Merlot",
+      "Cabernet Franc",
+      "Chardonnay",
+      "Sauvignon Blanc"
+    ],
+    "rare": [
+      "Cinsault",
+      "Petit Verdot",
+      "Semillon",
+      "Roussanne"
+    ],
+    "temperament_seconds": [
+      "Cabernet Franc"
+    ]
+  },
+  "Swartland": {
+    "signature": [
+      "Chenin Blanc",
+      "Syrah"
+    ],
+    "lesser_known": [
+      "Cinsault",
+      "Grenache",
+      "Mourvèdre",
+      "Carignan",
+      "Tinta Barocca"
+    ],
+    "rare": [
+      "Palomino",
+      "Pontac",
+      "Hárslevelű",
+      "Verdelho"
+    ],
+    "temperament_seconds": [
+      "Cinsault"
+    ]
+  },
+  "Columbia Valley": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Merlot",
+      "Syrah"
+    ],
+    "lesser_known": [
+      "Riesling",
+      "Chardonnay",
+      "Cabernet Franc",
+      "Sangiovese"
+    ],
+    "rare": [
+      "Carménère",
+      "Grenache",
+      "Mourvèdre",
+      "Tempranillo"
+    ],
+    "temperament_seconds": [
+      "Riesling"
+    ]
+  },
+  "Finger Lakes": {
+    "signature": [
+      "Riesling"
+    ],
+    "lesser_known": [
+      "Cabernet Franc",
+      "Pinot Noir",
+      "Chardonnay",
+      "Gewürztraminer"
+    ],
+    "rare": [
+      "Vidal Blanc",
+      "Vignoles",
+      "Saperavi",
+      "Lemberger (Blaufränkisch)"
+    ],
+    "temperament_seconds": [
+      "Cabernet Franc"
+    ]
+  },
+  "Napa Valley": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Merlot"
+    ],
+    "lesser_known": [
+      "Cabernet Franc",
+      "Chardonnay",
+      "Zinfandel",
+      "Sauvignon Blanc"
+    ],
+    "rare": [
+      "Petit Verdot",
+      "Malbec",
+      "Charbono",
+      "Petite Sirah"
+    ],
+    "temperament_seconds": [
+      "Zinfandel"
+    ]
+  },
+  "Paso Robles": {
+    "signature": [
+      "Zinfandel",
+      "Cabernet Sauvignon",
+      "Syrah"
+    ],
+    "lesser_known": [
+      "Grenache",
+      "Mourvèdre",
+      "Petite Sirah",
+      "Roussanne",
+      "Viognier"
+    ],
+    "rare": [
+      "Counoise",
+      "Picpoul Blanc",
+      "Tannat",
+      "Grenache Blanc"
+    ],
+    "temperament_seconds": [
+      "Grenache"
+    ]
+  },
+  "Sonoma": {
+    "signature": [
+      "Pinot Noir",
+      "Chardonnay",
+      "Zinfandel",
+      "Cabernet Sauvignon"
+    ],
+    "lesser_known": [
+      "Syrah",
+      "Sauvignon Blanc",
+      "Petite Sirah",
+      "Carignan"
+    ],
+    "rare": [
+      "Trousseau Gris",
+      "Valdiguié",
+      "Cinsault",
+      "Alicante Bouschet"
+    ],
+    "temperament_seconds": [
+      "Carignan"
+    ]
+  },
+  "Kamptal": {
+    "signature": [
+      "Grüner Veltliner",
+      "Riesling"
+    ],
+    "lesser_known": [
+      "Zweigelt",
+      "Sankt Laurent",
+      "Pinot Noir",
+      "Chardonnay"
+    ],
+    "rare": [
+      "Roter Veltliner",
+      "Frühroter Veltliner",
+      "Pinot Blanc",
+      "Müller-Thurgau"
+    ],
+    "temperament_seconds": [
+      "Zweigelt"
+    ]
+  },
+  "Steiermark": {
+    "signature": [
+      "Sauvignon Blanc",
+      "Welschriesling"
+    ],
+    "lesser_known": [
+      "Morillon (Chardonnay)",
+      "Gelber Muskateller",
+      "Weissburgunder",
+      "Grauburgunder"
+    ],
+    "rare": [
+      "Blauer Wildbacher",
+      "Traminer",
+      "Riesling",
+      "Zweigelt"
+    ],
+    "temperament_seconds": [
+      "Gelber Muskateller"
+    ]
+  },
+  "Wachau": {
+    "signature": [
+      "Riesling",
+      "Grüner Veltliner"
+    ],
+    "lesser_known": [
+      "Neuburger",
+      "Weissburgunder",
+      "Chardonnay",
+      "Muskateller"
+    ],
+    "rare": [
+      "Roter Veltliner",
+      "Frühroter Veltliner",
+      "Sauvignon Blanc",
+      "Sylvaner"
+    ],
+    "temperament_seconds": []
+  },
+  "Alsace": {
+    "signature": [
+      "Riesling",
+      "Gewürztraminer",
+      "Pinot Gris"
+    ],
+    "lesser_known": [
+      "Pinot Blanc",
+      "Sylvaner",
+      "Muscat (Blanc à Petits Grains + Ottonel)",
+      "Pinot Noir",
+      "Auxerrois"
+    ],
+    "rare": [
+      "Klevener de Heiligenstein (Savagnin Rose)",
+      "Chasselas"
+    ],
+    "temperament_seconds": [
+      "Muscat (Blanc à Petits Grains + Ottonel)"
+    ]
+  },
+  "Loire": {
+    "signature": [
+      "Chenin Blanc",
+      "Sauvignon Blanc",
+      "Cabernet Franc"
+    ],
+    "lesser_known": [
+      "Melon de Bourgogne",
+      "Pineau d'Aunis",
+      "Gamay (Loire)",
+      "Pinot Noir (Sancerre)",
+      "Grolleau",
+      "Chasselas"
+    ],
+    "rare": [
+      "Romorantin",
+      "Côt (Malbec)",
+      "Menu Pineau (Arbois)"
+    ],
+    "temperament_seconds": [
+      "Pineau d'Aunis"
+    ]
+  },
+  "Nahe": {
+    "signature": [
+      "Riesling"
+    ],
+    "lesser_known": [
+      "Weissburgunder",
+      "Grauburgunder",
+      "Spätburgunder",
+      "Silvaner"
+    ],
+    "rare": [
+      "Müller-Thurgau",
+      "Scheurebe",
+      "Frühburgunder"
+    ],
+    "temperament_seconds": [
+      "Silvaner"
+    ]
+  },
+  "Alto Adige": {
+    "signature": [
+      "Pinot Grigio",
+      "Gewürztraminer",
+      "Pinot Bianco"
+    ],
+    "lesser_known": [
+      "Lagrein",
+      "Schiava (Vernatsch)",
+      "Kerner",
+      "Sylvaner",
+      "Müller-Thurgau",
+      "Chardonnay",
+      "Sauvignon Blanc"
+    ],
+    "rare": [
+      "Lagrein Rosato",
+      "Veltliner",
+      "Blatterle",
+      "Fraueler"
+    ],
+    "temperament_seconds": [
+      "Kerner"
+    ]
+  },
+  "Friuli-Venezia Giulia": {
+    "signature": [
+      "Friulano",
+      "Pinot Grigio"
+    ],
+    "lesser_known": [
+      "Ribolla Gialla",
+      "Sauvignon Blanc",
+      "Refosco",
+      "Malvasia Istriana",
+      "Schioppettino",
+      "Pignolo",
+      "Verduzzo"
+    ],
+    "rare": [
+      "Vitovska",
+      "Picolit",
+      "Terrano",
+      "Tazzelenghe"
+    ],
+    "temperament_seconds": [
+      "Ribolla Gialla"
+    ]
+  },
+  "Tuscany": {
+    "signature": [
+      "Sangiovese",
+      "Cabernet Sauvignon",
+      "Merlot"
+    ],
+    "lesser_known": [
+      "Canaiolo",
+      "Colorino",
+      "Cabernet Franc",
+      "Vernaccia di San Gimignano",
+      "Vermentino",
+      "Ciliegiolo"
+    ],
+    "rare": [
+      "Pugnitello",
+      "Mammolo",
+      "Ansonica"
+    ],
+    "temperament_seconds": [
+      "Canaiolo"
+    ]
+  },
+  "Goriška Brda": {
+    "signature": [
+      "Rebula (Ribolla Gialla)",
+      "Merlot"
+    ],
+    "lesser_known": [
+      "Sauvignon Blanc",
+      "Chardonnay",
+      "Sivi Pinot (Pinot Grigio)",
+      "Pinela",
+      "Zelen",
+      "Malvazija Istarska",
+      "Refošk"
+    ],
+    "rare": [
+      "Klarnica",
+      "Vitovska Grganja",
+      "Pikolit"
+    ],
+    "temperament_seconds": [
+      "Pinela"
+    ]
+  },
+  "Margaret River": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Chardonnay"
+    ],
+    "lesser_known": [
+      "Semillon",
+      "Sauvignon Blanc",
+      "Merlot",
+      "Cabernet Franc",
+      "Shiraz"
+    ],
+    "rare": [
+      "Malbec",
+      "Petit Verdot",
+      "Chenin Blanc"
+    ],
+    "temperament_seconds": [
+      "Semillon"
+    ]
+  },
+  "Maipo Valley": {
+    "signature": [
+      "Cabernet Sauvignon"
+    ],
+    "lesser_known": [
+      "Carménère",
+      "Merlot",
+      "Syrah",
+      "Cabernet Franc",
+      "Sauvignon Blanc",
+      "Chardonnay"
+    ],
+    "rare": [
+      "País (Mission)",
+      "Malbec",
+      "Sémillon"
+    ],
+    "temperament_seconds": [
+      "Carménère"
+    ]
+  },
+  "Hawke's Bay": {
+    "signature": [
+      "Cabernet Sauvignon",
+      "Merlot",
+      "Chardonnay"
+    ],
+    "lesser_known": [
+      "Syrah",
+      "Cabernet Franc",
+      "Malbec",
+      "Pinot Gris",
+      "Sauvignon Blanc",
+      "Viognier"
+    ],
+    "rare": [
+      "Tempranillo",
+      "Albariño",
+      "Gewürztraminer",
+      "Petit Verdot"
+    ],
+    "temperament_seconds": [
+      "Syrah"
+    ]
+  },
+  "Santa Barbara": {
+    "signature": [
+      "Pinot Noir",
+      "Chardonnay"
+    ],
+    "lesser_known": [
+      "Syrah",
+      "Grenache",
+      "Sauvignon Blanc",
+      "Cabernet Sauvignon"
+    ],
+    "rare": [
+      "Trousseau Noir",
+      "Gamay Noir",
+      "Counoise"
+    ],
+    "temperament_seconds": [
+      "Syrah"
+    ]
+  },
+  "Willamette Valley": {
+    "signature": [
+      "Pinot Noir"
+    ],
+    "lesser_known": [
+      "Chardonnay",
+      "Pinot Gris",
+      "Riesling",
+      "Gamay Noir",
+      "Chenin Blanc"
+    ],
+    "rare": [
+      "Trousseau",
+      "Pinot Meunier",
+      "Pinot Blanc",
+      "Auxerrois"
+    ],
+    "temperament_seconds": [
+      "Gamay Noir"
+    ]
+  }
+}

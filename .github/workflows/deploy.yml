@@ -1,0 +1,76 @@
+# ============================================================================
+# Deploy Region Resonances to GitHub Pages
+#
+# Triggers on every push to main. Builds the Vite app inside ./app/ and
+# publishes the resulting ./app/dist/ folder to GitHub Pages.
+#
+# Permissions follow GitHub's recommended Pages-deployment pattern:
+#   - contents: read       (to clone the repo)
+#   - pages: write         (to publish the site)
+#   - id-token: write      (for the OIDC token used by deploy-pages)
+# ============================================================================
+
+name: Deploy to GitHub Pages
+
+on:
+  # Auto-deploy on every push to main
+  push:
+    branches: [main]
+
+  # Allow manual trigger from the Actions tab in GitHub
+  workflow_dispatch:
+
+# Allow only one concurrent deployment, skipping queued runs in between.
+# Don't cancel in-progress runs — let them finish so we don't end up with
+# half-deployed site state.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # ---------- BUILD JOB ----------
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'app/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./app
+        run: npm ci
+
+      - name: Build
+        working-directory: ./app
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload built site as Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './app/dist'
+
+  # ---------- DEPLOY JOB ----------
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
