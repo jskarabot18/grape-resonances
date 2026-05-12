@@ -15,9 +15,9 @@ const EXAMPLE_QUERIES = [
   'falling deeply in love',
   'the feeling of brotherhood',
   'the weight of a decision',
-  'the slow undoing of an old certainty',
-  'the quiet authority of having survived something',
-  'what you keep when everything else is gone',
+  'the way time slows when it matters',
+  'the soft arrival of an unexpected joy',
+  'walking through a place that knew you first',
 ];
 
 export default function InputPanel({
