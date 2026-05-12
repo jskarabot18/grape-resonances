@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Base styles — mirrors region-affinities for cross-tool unity.
+   ============================================================ */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-parchment text-ink font-serif;
+    font-feature-settings: 'liga' 1, 'kern' 1;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif text-ink;
+    letter-spacing: -0.01em;
+  }
+
+  /* Selection styling — wine on parchment, matches the brand */
+  ::selection {
+    background-color: theme('colors.wine.100');
+    color: theme('colors.wine.700');
+  }
+}
+
+/* ============================================================
+   Component primitives — copied verbatim from region-affinities
+   so shared components (Header, pills, nav-links) look identical.
+   ============================================================ */
+@layer components {
+  .nav-link {
+    @apply px-4 py-2 text-sm tracking-wide uppercase font-sans font-medium
+           text-ink-muted transition-colors hover:text-wine border-b-2 border-transparent;
+  }
+  .nav-link-active {
+    @apply text-wine border-wine;
+  }
+  .pill {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-sans
+           font-medium tracking-wide;
+  }
+  .small-caps {
+    @apply font-sans uppercase tracking-widest text-xs text-ink-muted;
+  }
+
+  /* ============================================================
+     Region Resonances additions — built on top of the shared base.
+     ============================================================ */
+
+  /* The metaphor word displayed prominently — italic wine red, like
+     the result cards in the planning doc spec. Used inline with body
+     copy or as a card heading. */
+  .metaphor {
+    @apply italic text-wine font-serif;
+  }
+
+  /* Cluster pills — coloured by cluster identity. We override the
+     base .pill background/foreground via .pill--<cluster>.
+     Keeping the cluster colour mapping tight to avoid a busy palette. */
+  .pill--old-world-interior  { @apply bg-wine-100 text-wine-700; }
+  .pill--old-world-exterior  { @apply bg-parchment-edge text-ink-muted; }
+  .pill--new-world-reinvention { @apply bg-wine-50 text-wine-600; }
+  .pill--outward-ease        { @apply bg-parchment-warm text-ink-muted; }
+  .pill--against-the-odds    { @apply bg-wine-200 text-wine-800; }
+  .pill--the-moderates       { @apply bg-parchment-edge text-ink-muted; }
+
+  /* Card containers — soft parchment-warm background with edge border.
+     Subtle hover lift, no aggressive shadows. Wine-literature aesthetic. */
+  .card {
+    @apply bg-parchment-warm border border-parchment-edge rounded-sm
+           transition-all duration-300;
+  }
+  .card-interactive {
+    @apply card hover:border-wine-200 cursor-pointer;
+  }
+
+  /* Example chips on the input panel — muted by default, wine on hover.
+     Sans-serif, small, slightly tracked — feels like a UI element rather
+     than body copy. */
+  .chip {
+    @apply inline-flex items-center px-3 py-1 rounded-full
+           border border-parchment-edge bg-parchment text-ink-muted
+           font-sans text-xs tracking-wide
+           transition-all duration-200
+           hover:border-wine-300 hover:text-wine cursor-pointer;
+  }
+
+  /* The big freeform input — large, serif, parchment background.
+     Feels like writing in a journal rather than filling out a form. */
+  .resonance-input {
+    @apply w-full px-4 py-3 bg-parchment border border-parchment-edge
+           rounded-sm font-serif text-lg text-ink
+           placeholder:text-ink-subtle placeholder:italic
+           focus:outline-none focus:border-wine-300
+           transition-colors duration-200;
+  }
+}
+
+/* ============================================================
+   Custom utilities not covered by Tailwind defaults.
+   ============================================================ */
+@layer utilities {
+  /* Drop-cap for the very first paragraph of a region narrative when
+     expanded — adds editorial gravitas. */
+  .drop-cap::first-letter {
+    @apply font-serif text-wine;
+    font-size: 3.5rem;
+    line-height: 0.85;
+    float: left;
+    margin-right: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Subtle reveal animation for results streaming in — staggered via
+     CSS variable, set per-card from JS. */
+  .fade-in-stagger {
+    animation: fade-in-stagger 0.6s ease-out backwards;
+    animation-delay: var(--stagger-delay, 0ms);
+  }
+  @keyframes fade-in-stagger {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

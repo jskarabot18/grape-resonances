@@ -99,7 +99,7 @@ For each of the 59 regions, four fields:
 
 #### `grape_narratives.json` (authored)
 
-One or two sentences per grape, in Soul of Wine voice, focused on *character* rather than tasting notes. Static text shipped in JSON. Used as the descriptive copy under each grape in the response.
+One or two sentences per grape, in Soul of Wine voice, focused on *character* rather than tasting notes. Static text shipped in JSON. **Used as the per-grape descriptive copy in the trace fold** (see §"Trace fold — locked spec (2026-05-10)" below); not visible in the default oracle response.
 
 Example entries:
 
@@ -115,6 +115,16 @@ Example entries:
 **Estimated authoring time:** ~10–15 hours for ~100 grapes (the canonical set across the curated `region_grapes.json` tiers). Can be expanded incrementally — start with the grapes that appear in the curated tiers and grow over time.
 
 **Voice constraint:** must match Soul of Wine register. Declarative but not preachy. Character-focused, not flavor-focused. One sentence preferred; two if necessary; three is too many.
+
+**Authoring methodology — blind drafting (locked 2026-05-10).** Each grape narrative is drafted *without reference to previously drafted entries*. The reason: cross-referencing during drafting creates implicit clusters — when two grapes are written with one eye on each other, the writer reaches for differentiating vocabulary, and the resulting shared/distinct word choices imply a structural kinship (or non-kinship) the framework has not asserted. **Structural claims live in Soul of Wine, not in the grape narratives.** Each grape must be permitted to find its own right words; if two grapes genuinely need the same word, they need it.
+
+The protocol:
+
+- *Drafting mode (blind):* the writer has access to (a) the grape itself, (b) the four canonical exemplars above as voice anchors, (c) Soul of Wine region narratives and cluster metaphors as background context, (d) `region_grapes.json` regional roles for the grape. The writer does **not** re-read previously drafted entries before drafting the next one.
+- *No defensive vocabulary-checking during drafting.* Words are chosen for the grape, not against the prior batch.
+- *Review pass after completion.* Once all 101 narratives are drafted, a diagnostic pass identifies content-word recurrences across entries. The review distinguishes three categories: (i) factual recurrence (Bordeaux, late-ripening, thin-skinned, etc.) — accepted; (ii) coincidental stylistic recurrence — revised case by case if it obscures rather than illuminates; (iii) genuine pattern findings (e.g. multiple grapes carrying a real shared cultural role) — accepted as findings and possibly surfaced in commentary.
+
+This methodology was adopted after an initial batch was drafted under cross-referencing discipline and found to be contorted — the iterative revisions chased word-avoidance rather than character. The blind-draft method was tested on a redraft of the same batch and found to produce more natural prose without manufacturing differentiation. The decision is recorded here so future drafting sessions don't revert.
 
 #### `cluster_framings.json` (authored)
 
@@ -145,7 +155,7 @@ Example:
 
 This is the design hinge. Grape Resonances should be **maximally compressed** by default. The user gets the grape names. Everything else is scaffolding.
 
-### Default response shape
+### Default response shape (locked 2026-05-10)
 
 ```
 {Grape A} · {Grape B} · {Grape C}
@@ -158,6 +168,8 @@ Does this resonate? [yes] [partially] [no]
 ```
 
 That is the entire response. Two to four grape names, one framing sentence, one verification prompt, one collapsed fold for the user who wants the trace.
+
+**`grape_narratives.json` does not appear in this default surface.** Per the locked decision of 2026-05-10, the narratives live in the trace fold only. The default response stays maximally compressed per §4.11 of `vinotheca/PROJECT.md` — the oracle's authority comes partly from its restraint.
 
 ### Worked examples
 
@@ -186,6 +198,56 @@ A real architectural finding from worked examples: **some queries land on a sing
 - *Falling deeply in love* is a prism — five regions, multiple clusters, five different facets of one experience. Response: name the prism explicitly, surface the recurrence (Pinot Noir three times), use the prism framing template.
 
 **Detection rule for v1 (proposed):** examine the variance of matched regions on the six D-axes. Below a threshold, treat as bullseye. Above the threshold, treat as prism. Exact threshold to be tuned during prototype testing.
+
+### Aggregator selection rule — recurrence as finding (locked 2026-05-10)
+
+The aggregator turns *top-N matched regions* into *2–4 response grapes* using a recurrence-led rule. The principle: **when a grape recurs across multiple matched regions as their signature, the recurrence itself is the finding** — and the framework should name it that way rather than padding the response with single-region picks to reach a target count.
+
+Procedure:
+
+1. **Collect.** For each of the top-N matched regions, read `region_grapes.json` and extract its `signature` grapes (v1 uses Tier 1 only — see open question 6).
+2. **Tally.** Count how many of the N regions list each grape as a signature, and compute a similarity-weighted score (sum of region similarities for each contributing region).
+3. **Select** by the following rule:
+   - **One grape recurs in ≥3 of N regions (strong recurrence):** return that grape *alone*. The framework framing names the recurrence ("appears three times: as devotion in Burgundy, as idealism in Willamette, as patient continuation in Santa Cruz Mountains"). This is the Pinot-Noir-for-falling-in-love case.
+   - **2 to 4 grapes recur in ≥2 regions each (multi-grape bullseye):** return those grapes (cap at 4). The framework framing names the shared temperament. This is the brotherhood case.
+   - **No grape recurs across regions (prism):** return the top 2–3 grapes by similarity-weighted score. The framing names the prism — different facets of one feeling, each grape carrying one facet.
+4. **Frame** with copy from `cluster_framings.json` (bullseye cases, using the dominant cluster) or the prism template (prism case).
+
+**Worked example — "falling deeply in love":** matched regions are Burgundy (0.91), Willamette Valley (0.87), Santa Cruz Mountains (0.83), Mosel (0.79), Tokaj (0.74). Pinot Noir appears as signature in 3 of 5 regions; no other grape appears in more than one. Selection rule returns Pinot Noir alone. The framing names the recurrence using each contributing region's cluster metaphor — *devotion / idealism / patient continuation*.
+
+### Trace fold — locked spec (2026-05-10)
+
+When the user expands *"See how the framework arrived at this,"* the fold shows a **grape-organised** layout. For each response grape, in the order they appear in the default response:
+
+```
+{Grape name}
+
+{Grape narrative from grape_narratives.json}
+
+This grape appeared as the signature of {k} of {N} matched regions:
+  {Region name} ({similarity score}) — {region's cluster metaphor}
+  {Region name} ({similarity score}) — {region's cluster metaphor}
+  ...
+
+{One-sentence interpretive close, drawn from response template}
+```
+
+After all response grapes have been shown:
+
+```
+→ See this query in Region Resonances for the regional reading
+```
+
+The trace fold thus carries **four kinds of content**, each from a defined source:
+
+- *Grape name* — from the aggregator's selection (Stage 5 of the pipeline)
+- *Grape narrative* — from `grape_narratives.json`, region-tethered character note in Soul of Wine voice
+- *Per-region tie line* — generated mechanically: region name + similarity score from the matcher + region's locked Soul of Wine cluster metaphor (no new authoring required)
+- *Interpretive close* — drawn from response templates: bullseye-single-grape ("the same grape carries the same feeling through different cultural temperaments"), multi-grape bullseye ("these grapes share a temperament"), or prism ("each grape carries one facet of your word")
+
+The cross-link to Region Resonances closes the fold per open question 8.
+
+This spec closes open question 5 of "Open questions to resolve before building."
 
 ### What the response is *not*
 
@@ -268,8 +330,8 @@ grape-resonances/
 2. **Same Cloudflare Worker, or new one?** — likely the same, with rate-limit budget extended. No technical reason to fork.
 3. **Curation: solo author, or solicited input from wine experts?** — solo for v1 (preserves voice consistency); could solicit feedback before launch.
 4. **Verification prompt — does it write anything anywhere?** — privacy-first ethos says no. The prompt is purely for the user's pause; nothing recorded, nothing tracked. The act of clicking is its own moment.
-5. **Trace fold contents** — when the user expands "see how the framework arrived at this," what shows? Probably: the matched regions with similarity scores, a one-line per region tying it to a grape, and a link to Region Resonances for the same query. Worth designing carefully — this is where curious users go to understand the framework.
-6. **Tier 2 in the response** — the planning has Tier 1 (signature) as the default response. Tier 2 (`temperament_seconds`) might appear as a *go deeper* expansion below the main answer, or might only appear in the trace fold, or might not appear in v1 at all. Recommendation: ship v1 with Tier 1 only; add Tier 2 as v1.1 once the oracle frame is established.
+5. **~~Trace fold contents~~ — CLOSED 2026-05-10.** Locked spec in §"Trace fold — locked spec" above. Grape-organised layout, four content kinds (grape name, narrative, per-region tie, interpretive close) plus cross-link to Region Resonances.
+6. **~~Tier 2 in the response~~ — RESOLVED 2026-05-10.** v1 ships with Tier 1 (`signature`) only, per the aggregator selection rule locked above. Tier 2 (`temperament_seconds`) remains in the data and is available to v1.1 or v2 if user feedback warrants — but does not appear in v1 trace fold output.
 7. **Wrong-shaped query detection** — exact mechanism (keyword list, small classifier, LLM call) to be decided. Probably a simple keyword/pattern detector for v1.
 8. **Cross-link with Region Resonances** — should typing the same query in both tools surface comparable results? Probably yes; the matching engine is the same. The trace fold could include "see this query in Region Resonances →" and vice versa.
 

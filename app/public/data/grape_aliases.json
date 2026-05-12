@@ -1,0 +1,36 @@
+{
+  "_metadata": {
+    "schema_version": "v1",
+    "completed": "2026-05-11",
+    "purpose": "Maps regional synonyms and disambiguation parentheticals in region_grapes.json's signature field to their canonical-101 names. Used by the Grape Resonances aggregator at recurrence-count time so that the same grape carrying the same temperament under different regional names counts as one finding.",
+    "scope": "Signature-tier entries only (v1 uses Tier 1 only). Lesser-known and rare tiers are not consulted by the v1 aggregator and so need not be aliased here.",
+    "rule": "An alias is included only when source and target are the same grape variety. Regional spelling variants of the same grape (Spätburgunder, Shiraz, Pinot Grigio, Tinto Fino, Cannonau, Garnatxa, Macabeu→[no canonical], etc.) are aliased. Distinct but related grapes (Pinot Meunier vs Pinot Noir; Carricante vs Catarratto) are NOT aliased — they are different varieties even where genetically related.",
+    "silent_skip": "Signature grapes that are neither in the canonical 101 nor in this alias table are silently dropped from the response pool. Per the v1 scope decision (PROJECT.md 2026-05-10), the canonical 101 is the user-facing set; some regions (notably Etna, Liguria, Goriška Brda, Jura, Champagne) thereby contribute no v1 grape. The trace fold still shows the matched region; it just does not surface a grape from it.",
+    "n_aliases": 12,
+    "non_aliased_non_canonical_signatures": [
+      "Carricante",
+      "Glera",
+      "Greco di Tufo",
+      "Grillo",
+      "Macabeu",
+      "Pigato",
+      "Pinot Meunier",
+      "Pošip",
+      "Rebula (Ribolla Gialla)",
+      "Rossese",
+      "Savagnin"
+    ]
+  },
+  "Spätburgunder": "Pinot Noir",
+  "Shiraz": "Syrah",
+  "Pinot Grigio": "Pinot Gris",
+  "Pinot Bianco": "Pinot Blanc",
+  "Weissburgunder": "Pinot Blanc",
+  "Grauburgunder": "Pinot Gris",
+  "Tinto Fino": "Tempranillo",
+  "Cannonau": "Grenache",
+  "Garnatxa (Grenache)": "Grenache",
+  "Carinyena (Carignan)": "Carignan",
+  "Carignano": "Carignan",
+  "Semillon (Hunter Valley)": "Sémillon"
+}
