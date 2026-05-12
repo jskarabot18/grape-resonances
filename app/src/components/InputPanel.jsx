@@ -14,10 +14,12 @@
 const EXAMPLE_QUERIES = [
   'falling deeply in love',
   'the feeling of brotherhood',
-  'late summer',
   'the weight of a decision',
   'starting over',
   'the courage to wait',
+  'borrowed time',
+  'bright sorrow',
+  'gentle ruin',
 ];
 
 export default function InputPanel({
