@@ -190,6 +190,32 @@ These examples exhibit the tool's signature behaviors:
 - **Color and structure as findings.** The threshold example notices that all three grapes are white and share the property of "not committing to one style," and surfaces this as the response's character.
 - **Reading past the surface.** The threshold query is about deciding, not moving — the tool reads the underlying state (irresolution, holding) rather than the topical surface (relocation).
 
+### Worked examples — revised against curated data + live matcher (2026-05-11)
+
+The three Planning Doc worked examples above were authored at the design-conversation stage, when neither the curated `region_grapes.json` data nor the live matcher existed. They documented what was *imagined* would happen — synthesised match sets, hypothetical recurrences, and the framing rule the design was attempting to capture. They served their purpose: they were the validation evidence that locked the architecture (recurrence-as-finding, bullseyes-vs-prisms, the response shape). They remain useful as a record of the design-thinking that produced the framework.
+
+When the framework actually ran against the curated data via the live matcher on 2026-05-11, all three of those examples produced different responses than the Planning Doc predicted. The differences are interpretively interesting rather than defective. The framework's actual readings are recorded in detail in `vinotheca/PROJECT.md` §7 (entry for 2026-05-11, *Grape Resonances — four findings from live testing worth recording*). What follows is a short summary so this Planning Doc is internally consistent with what shipped.
+
+**What the live framework actually returns:**
+
+- *falling deeply in love* → **Pinot Noir · Furmint · Chardonnay** (multi-bullseye; 2 + 1 + 1 of 5 matched regions). The matcher returned Tokaj first (Furmint), Burgundy and Santa Cruz Mountains second-and-third (Pinot Noir), then Etna and Loire. Reads as *love's facets* — devotion (Burgundy), obsession (Santa Cruz), melancholy (Tokaj), awakening (Etna), sentimentality (Loire) — rather than the predicted Pinot-Noir-as-devotion-three-ways.
+
+- *the feeling of brotherhood* → **Syrah · Pinot Noir · Riesling** (multi-bullseye; each in 2 of 5 matched regions). Each grape reading across cultures: Syrah as Walla Walla community and Barossa fortitude (rendered with the alias annotation *as Shiraz*), Pinot Noir as Burgundy devotion and Pfalz generosity (*as Spätburgunder*), Riesling as Finger Lakes conviction and Pfalz generosity. Reads as *brotherhood as cross-cultural conviction* rather than the predicted communal-table Grenache/Gamay/Shiraz.
+
+- *making a decision about the move across the country* → **Cabernet Sauvignon · Merlot** (multi-bullseye; each in 2 of 5 matched regions, both Napa Valley and Columbia Valley). Reads as *new-world ambition* rather than the predicted threshold-whites of irresolution (Riesling/Chenin Blanc/Furmint).
+
+**One Planning Doc reading that the framework confirmed independently:** *late summer* (a Region Resonances chip that the build-session tested on Grape Resonances) → **Furmint · Plavac Mali · Chenin Blanc**. An independent Claude with no Vinotheca context, asked to read the same metaphor for grape varieties, also returned Furmint as primary — on similar grounds (Tokaj's late-harvest patience, the knowing-it-will-become-something-else quality). Two reasoning paths converging on the same answer is real evidence that the region narratives carry semantic temperament that survives embedding and ranks correctly.
+
+**What this changes about how the rest of this Planning Doc should be read:**
+
+1. **Strong recurrence is rarer than the Aggregator section above implies.** The rule was authored with strong-recurrence as the paradigmatic case (Pinot Noir alone, the Burgundy/Willamette/Santa Cruz triangulation). In live use, strong recurrence almost never fires: the matcher operates on regional temperament narratives, the recurrence rule operates on signature-grape distribution, and these dimensions don't naturally coincide. **Multi-grape responses are the norm; single-grape responses are an exception that signals genuine unitary feeling.** Both behaviours are correct readings; the design assumption about which would be common was inverted by data.
+
+2. **The predicted bullseye/prism assignments don't hold.** The "Bullseyes vs prisms" section below claims *brotherhood is a bullseye* and *falling deeply in love is a prism*. Live data makes both readings more honestly *multi-bullseye* (different grapes co-equally recurring), which is its own case in the locked aggregator rule. The bullseye/prism distinction remains architecturally sound but the worked examples were the wrong illustrations of it.
+
+3. **The framework's readings are interpretively richer than the predictions, not poorer.** All three live readings carry more cultural and emotional information than the doctrinaire predictions did — *love's facets across temperaments* is more interesting than *love as devotion three times*. This is recorded as a substantive finding about what the framework does well: it does not echo the writer's hypotheses, it reads what the curated narratives actually carry.
+
+The original worked examples are preserved above as the historical record of the design conversation. The actual framework behaviour, recorded in PROJECT.md §7, is the spec going forward.
+
 ### Bullseyes vs. prisms
 
 A real architectural finding from worked examples: **some queries land on a single coherent temperament (bullseyes); some refract into multiple coherent facets (prisms).**
@@ -198,6 +224,8 @@ A real architectural finding from worked examples: **some queries land on a sing
 - *Falling deeply in love* is a prism — five regions, multiple clusters, five different facets of one experience. Response: name the prism explicitly, surface the recurrence (Pinot Noir three times), use the prism framing template.
 
 **Detection rule for v1 (proposed):** examine the variance of matched regions on the six D-axes. Below a threshold, treat as bullseye. Above the threshold, treat as prism. Exact threshold to be tuned during prototype testing.
+
+> *Note (2026-05-11):* the bullseye/prism architectural distinction shipped intact and is implemented in `coherence.js` via cluster recurrence (≥4 of N matched regions sharing a cluster → bullseye framing; prism framing otherwise). The specific bullseye-vs-prism assignments for the three worked examples above (*brotherhood as bullseye, falling-deeply-in-love as prism*) did not survive live data — both queries actually return `multi_bullseye` from the aggregator with `prism`-style cluster framing applied separately by the coherence detector. The architectural separation between aggregator (grape recurrence) and coherence detector (cluster recurrence) means these can disagree, and they do. See the revised worked-examples subsection above for the actual behaviour.
 
 ### Aggregator selection rule — recurrence as finding (locked 2026-05-10)
 
@@ -214,6 +242,8 @@ Procedure:
 4. **Frame** with copy from `cluster_framings.json` (bullseye cases, using the dominant cluster) or the prism template (prism case).
 
 **Worked example — "falling deeply in love":** matched regions are Burgundy (0.91), Willamette Valley (0.87), Santa Cruz Mountains (0.83), Mosel (0.79), Tokaj (0.74). Pinot Noir appears as signature in 3 of 5 regions; no other grape appears in more than one. Selection rule returns Pinot Noir alone. The framing names the recurrence using each contributing region's cluster metaphor — *devotion / idealism / patient continuation*.
+
+> *Note (2026-05-11):* the worked example above is the design-stage hypothesis. The live matcher returns a different set of regions for the same query and the rule fires `multi_bullseye` rather than `strong_recurrence` — see the "Worked examples — revised against curated data + live matcher" subsection earlier in this document for the actual behaviour. The rule itself is unchanged and shipped as designed; strong-recurrence is implemented and tested, it just fires more rarely than the synthetic example suggested.
 
 ### Trace fold — locked spec (2026-05-10)
 
