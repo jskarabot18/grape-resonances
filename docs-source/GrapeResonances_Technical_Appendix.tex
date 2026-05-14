@@ -1,0 +1,332 @@
+\documentclass[11pt]{article}
+\usepackage{vinotheca}
+
+\providecommand{\R}{\mathbb{R}}
+\providecommand{\N}{\mathbb{N}}
+\providecommand{\inner}[2]{\langle #1, #2 \rangle}
+\providecommand{\norm}[1]{\lVert #1 \rVert}
+\providecommand{\indicator}{\mathbf{1}}
+
+\begin{document}
+
+\vinothecaTitle{Grape Resonances}{Technical Appendix}{Mathematical Framework, Algorithms, and Implementation}
+\vinothecaAuthor{Jure Skarabot}{May 2026}
+\vinothecaCompanions{Summary \textperiodcentered{} Methods Primer \textperiodcentered{} Technical Appendix \textperiodcentered{} Data Appendix \textperiodcentered{} Region Reference (Identity)}
+
+This appendix presents the mathematical framework for the layer that Grape Resonances adds above the Region Resonances matcher: the alias resolution operator, the aggregator's recurrence-as-finding selection rule, and the coherence detector's cluster-count rule. The matcher itself --- the embedding map $E$, the unit sphere $S^{1535}$, cosine similarity, and top-$k$ ranking --- is treated in the companion \emph{Region Resonances Technical Appendix} and not re-derived here. Notation follows standard set theory and linear algebra; treatments are stated rather than derived, with references provided for full derivations.
+
+The companion \emph{Methods Primer} provides a plain-language treatment of the same material; the companion \emph{Data Appendix} provides the full corpus listings the framework reads against.
+
+\section*{A. Mathematical Framework}
+
+\subsection*{A.1 The Matched-Region Set}
+The matcher returns an ordered tuple of $N$ matched regions and their similarity scores. Let
+\[
+\mathcal{M} = \bigl( (\rho_1, s_1), \, (\rho_2, s_2), \, \ldots, \, (\rho_N, s_N) \bigr),
+\]
+where each $\rho_i$ is a region identifier drawn from the corpus $\mathcal{R} = \{r_1, \ldots, r_{59}\}$ and each $s_i \in [-1, 1]$ is the cosine similarity returned by the matcher, sorted so that $s_1 \geq s_2 \geq \cdots \geq s_N$. The deployed tool sets $N = 5$. The aggregator and coherence detector are defined for arbitrary $N$ but their thresholds are calibrated against $N = 5$ (see \S A.4 and \S A.7).
+
+\subsection*{A.2 Signature Grape Lists and the Canonical Surface}
+For each region $\rho \in \mathcal{R}$ the curated file \texttt{region\_grapes.json} provides a signature grape list, denoted
+\[
+\sigma(\rho) \subseteq \mathcal{G}^{*},
+\]
+where $\mathcal{G}^{*}$ is the universe of grape strings as written in the regional curation (the alphabet of possible regional spellings, including Spätburgunder, Shiraz, Tinto Fino, Cannonau, and so on). The signature list $\sigma(\rho)$ contains between 1 and 4 entries.
+
+Let $\mathcal{C} \subset \mathcal{G}^{*}$ denote the \emph{canonical grape surface}: the set of grape strings that the framework treats as response-eligible canonical names. In the deployed tool, $|\mathcal{C}| = 101$, partitioned into 53 reds and 48 whites. The set is locked at build time; the response pool is closed.
+
+\subsection*{A.3 Alias Resolution as a Function}
+The alias file \texttt{grape\_aliases.json} defines a partial function
+\[
+\alpha : \mathcal{G}^{*} \rightharpoonup \mathcal{C}
+\]
+that maps a regional spelling to its canonical name when the two refer to the same botanical variety. The deployed tool has $|\mathrm{dom}(\alpha)| = 12$. Each entry records a one-to-one correspondence; the function is well-defined.
+
+Extend $\alpha$ to a total function $\bar\alpha : \mathcal{G}^{*} \to \mathcal{C} \cup \{\bot\}$ by
+\[
+\bar\alpha(g) =
+\begin{cases}
+g                & \text{if } g \in \mathcal{C} \\
+\alpha(g)        & \text{if } g \in \mathrm{dom}(\alpha) \\
+\bot             & \text{otherwise.}
+\end{cases}
+\]
+The symbol $\bot$ represents the \emph{silent-skip state}: regional grape strings that are neither canonical nor aliased to a canonical name. The deployed tool has eleven such strings in the curated regional signatures, enumerated in the Data Appendix.
+
+The aggregator applies $\bar\alpha$ to each entry of each signature list before counting. Let $\bar\sigma(\rho) = \{ \bar\alpha(g) : g \in \sigma(\rho), \bar\alpha(g) \neq \bot \}$ denote the canonicalised signature for region $\rho$; this is a (possibly empty) subset of $\mathcal{C}$.
+
+\subsection*{A.4 The Recurrence Count}
+For each canonical grape $g \in \mathcal{C}$ and each matched-region set $\mathcal{M}$, define the recurrence count
+\[
+n(g, \mathcal{M}) = \sum_{i=1}^{N} \indicator[g \in \bar\sigma(\rho_i)],
+\]
+where $\indicator[\cdot]$ is the indicator function. The recurrence count is the number of matched regions whose canonicalised signature contains $g$. By construction, $n(g, \mathcal{M}) \in \{0, 1, \ldots, N\}$.
+
+\subsection*{A.5 The Similarity-Weighted Score}
+For each canonical grape $g \in \mathcal{C}$ and matched-region set $\mathcal{M}$, define the similarity-weighted score
+\[
+w(g, \mathcal{M}) = \sum_{i=1}^{N} s_i \cdot \indicator[g \in \bar\sigma(\rho_i)].
+\]
+The score is the sum of similarities for the matched regions in which $g$ appears as a canonicalised signature. It satisfies $w(g, \mathcal{M}) \geq 0$ when all $s_i \geq 0$, and $w(g, \mathcal{M}) \leq n(g, \mathcal{M}) \cdot s_1$ in general. The score is used only in the prism mode, where it breaks ties among grapes that did not recur but contributed individually to the matched-region set.
+
+\subsection*{A.6 The Aggregator Selection Rule}
+The aggregator returns a triple $(m, G, T)$ where $m \in \{\mathrm{strong}, \mathrm{multi}, \mathrm{prism}\}$ is the mode, $G \subseteq \mathcal{C}$ is the set of response grapes, and $T$ is the per-grape trace (the contributing regions for each $g \in G$). The selection rule is defined by the following piecewise expression.
+
+Let $\theta_{\mathrm{strong}} = 3$ and $\theta_{\mathrm{multi}} = 2$ denote the recurrence thresholds. The deployed tool fixes these values at $\theta_{\mathrm{strong}} = 3$ and $\theta_{\mathrm{multi}} = 2$ for $N = 5$. Then
+\[
+m =
+\begin{cases}
+\mathrm{strong} & \text{if } \max_{g \in \mathcal{C}} n(g, \mathcal{M}) \geq \theta_{\mathrm{strong}} \\
+\mathrm{multi}  & \text{if } | \{ g \in \mathcal{C} : n(g, \mathcal{M}) \geq \theta_{\mathrm{multi}} \} | \geq 2 \text{ and the strong condition is false} \\
+\mathrm{prism}  & \text{otherwise.}
+\end{cases}
+\]
+
+The cases are exhaustive: every $\mathcal{M}$ falls into exactly one mode (Proposition 1, \S A.10).
+
+The response set $G$ is defined per mode:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item If $m = \mathrm{strong}$: let $g^{*} = \arg\max_{g \in \mathcal{C}} n(g, \mathcal{M})$ (breaking ties by $w$). Then $G = \{ g^{*} \}$.
+\item If $m = \mathrm{multi}$: let $\mathcal{H} = \{ g \in \mathcal{C} : n(g, \mathcal{M}) \geq \theta_{\mathrm{multi}} \}$. Then $G$ is the four-most $w$-largest elements of $\mathcal{H}$, with at least two and at most four members. (If $|\mathcal{H}| > 4$, the smallest $w$-valued members are dropped.)
+\item If $m = \mathrm{prism}$: let $\mathcal{P} = \{ g \in \mathcal{C} : n(g, \mathcal{M}) \geq 1 \}$. Then $G$ is the three-most $w$-largest elements of $\mathcal{P}$, with at most three members.
+\end{itemize}
+
+The trace $T$ is generated mechanically: for each $g \in G$, list the regions $\rho_i$ for which $g \in \bar\sigma(\rho_i)$, paired with the similarity $s_i$, the region's cluster label, and the original regional spelling (the pre-canonicalised $g' \in \sigma(\rho_i)$ such that $\bar\alpha(g') = g$).
+
+\subsection*{A.7 The Coherence Detector}
+Independently of the aggregator, a second classifier examines the cluster labels of the matched regions. Let $\kappa : \mathcal{R} \to \mathcal{K}$ map each region to its Soul of Wine cluster, where $|\mathcal{K}| = 6$. Define the cluster count
+\[
+c(k, \mathcal{M}) = \sum_{i=1}^{N} \indicator[\kappa(\rho_i) = k], \qquad k \in \mathcal{K}.
+\]
+Let $\theta_{\mathrm{bullseye}} = 4$ denote the bullseye threshold. The coherence detector returns a verdict $v \in \{ \mathrm{bullseye}_k, \mathrm{prism} \}$ defined by
+\[
+v =
+\begin{cases}
+\mathrm{bullseye}_{k^{*}} & \text{if } \max_{k \in \mathcal{K}} c(k, \mathcal{M}) \geq \theta_{\mathrm{bullseye}} \\
+\mathrm{prism}            & \text{otherwise,}
+\end{cases}
+\]
+where $k^{*} = \arg\max_{k \in \mathcal{K}} c(k, \mathcal{M})$ when the bullseye condition holds. Ties in the argmax do not arise for $N = 5$, $\theta_{\mathrm{bullseye}} = 4$, $|\mathcal{K}| = 6$ (no two clusters can each contribute four of five matched regions). For larger $N$ a tiebreaker by total similarity within the cluster is defined in the implementation; it has not fired in the deployed corpus.
+
+\subsection*{A.8 Framing Sentence Selection}
+Let $\mathcal{F} = \{ f_{k} : k \in \mathcal{K} \} \cup \{ f_{\mathrm{prism}} \} \cup \mathcal{F}_{\mathrm{pair}}$ denote the framing-sentence bank, where each $f_{k}$ is a per-cluster bullseye framing, $f_{\mathrm{prism}}$ is the general prism framing, and $\mathcal{F}_{\mathrm{pair}}$ contains three pairwise prism framings indexed by ordered pairs of clusters. The deployed tool has $|\mathcal{F}_{\mathrm{pair}}| = 3$, covering the three most cohesive cluster pairs. The framing selector returns
+\[
+f =
+\begin{cases}
+f_{k^{*}}                              & \text{if } v = \mathrm{bullseye}_{k^{*}} \\
+f_{\mathrm{pair}}(k^{(1)}, k^{(2)})    & \text{if } v = \mathrm{prism} \text{ and } (k^{(1)}, k^{(2)}) \in \mathrm{index}(\mathcal{F}_{\mathrm{pair}}) \\
+f_{\mathrm{prism}}                     & \text{otherwise,}
+\end{cases}
+\]
+where $k^{(1)}, k^{(2)}$ are the two clusters with highest $c(\cdot, \mathcal{M})$ in the prism case.
+
+\subsection*{A.9 The Response Object}
+The full response object returned to the rendering layer is the tuple
+\[
+\mathcal{O}(\mathcal{M}) = (G, f, T, v, m),
+\]
+where $G$ is the set of response grapes, $f$ is the framing sentence, $T$ is the per-grape trace, $v$ is the coherence verdict, and $m$ is the aggregator mode. The rendering layer displays $(G, f)$ in the default surface and exposes $T$, with annotations derived from $v$ and $m$, in the trace fold.
+
+\subsection*{A.10 Properties}
+
+\paragraph{Proposition 1 (Exhaustive and exclusive modes).}
+For any $\mathcal{M}$, the aggregator's mode $m$ is well-defined and unique.
+
+\emph{Proof.} The three cases of the piecewise expression in \S A.6 are stated as a cascade: the multi case is reached only when the strong case fails; the prism case is reached only when both fail. Since the strong, multi, and prism conditions are jointly negated in the prism case ($\max n < \theta_{\mathrm{strong}}$ and $|\{ g : n(g, \mathcal{M}) \geq \theta_{\mathrm{multi}} \}| < 2$), the cases partition the input space. $\square$
+
+\paragraph{Proposition 2 (Independence of aggregator and coherence detector).}
+The mode $m$ and the verdict $v$ are independent: any combination $(m, v) \in \{\mathrm{strong}, \mathrm{multi}, \mathrm{prism}\} \times \{\mathrm{bullseye}_k, \mathrm{prism}\}$ is realisable.
+
+\emph{Sketch.} The mode depends on $\{ \bar\sigma(\rho_i) \}_i$; the verdict depends on $\{ \kappa(\rho_i) \}_i$. The signature lists and cluster labels are independent properties of the curated data: regions in the same cluster need not share signature grapes, and regions sharing signature grapes need not belong to the same cluster. The deployed corpus contains examples of all six combinations. $\square$
+
+\paragraph{Proposition 3 (Determinism).}
+For fixed inputs (the query string $q$, the matcher's pre-computed region embeddings $\{ \mathbf{r}_i \}$, and the curated data files $\sigma, \alpha, \kappa, \mathcal{F}$), the response object $\mathcal{O}$ is a deterministic function of $q$.
+
+\emph{Proof.} The matcher is deterministic (Region Resonances Technical Appendix, Proposition 1). The aggregator and coherence detector are pure functions of $\mathcal{M}$ and the curated data, computed by deterministic operations (set membership, summation, argmax, threshold comparisons, lookup in a static framing bank). Composition of deterministic functions is deterministic. $\square$
+
+\section*{B. Algorithms}
+
+\subsection*{B.1 The Aggregator}
+
+Pseudocode is given below. The algorithm assumes a fixed canonical surface $\mathcal{C}$ and alias map $\alpha$ loaded at startup. The input is the matched-region set $\mathcal{M}$ as returned by the matcher; the output is the response object's grape set, mode, and per-grape contributing-regions list.
+
+\begin{algorithm}[H]
+\caption{Aggregator}
+\begin{algorithmic}[1]
+\Function{Aggregate}{$\mathcal{M}$, $\sigma$, $\alpha$, $\mathcal{C}$}
+  \State $\bar\Sigma \gets \{\}$  \Comment{maps region to canonicalised signature set}
+  \For{$i \gets 1$ to $N$}
+    \State $\bar\sigma_i \gets \{\}$
+    \For{each $g \in \sigma(\rho_i)$}
+      \If{$g \in \mathcal{C}$}
+        \State $\bar\sigma_i \gets \bar\sigma_i \cup \{ (g, g) \}$  \Comment{canonical match, no alias}
+      \ElsIf{$g \in \mathrm{dom}(\alpha)$}
+        \State $\bar\sigma_i \gets \bar\sigma_i \cup \{ (\alpha(g), g) \}$  \Comment{aliased; preserve original spelling}
+      \EndIf  \Comment{else: silent-skip ($\bot$)}
+    \EndFor
+    \State $\bar\Sigma[\rho_i] \gets \bar\sigma_i$
+  \EndFor
+  \State $n \gets \{\}$;\ $w \gets \{\}$;\ $\mathrm{contrib} \gets \{\}$
+  \For{$i \gets 1$ to $N$}
+    \For{each $(g, g') \in \bar\Sigma[\rho_i]$}
+      \State $n[g] \gets n[g] + 1$
+      \State $w[g] \gets w[g] + s_i$
+      \State append $(\rho_i, s_i, \kappa(\rho_i), g')$ to $\mathrm{contrib}[g]$
+    \EndFor
+  \EndFor
+  \State $n_{\max} \gets \max_{g} n[g]$
+  \If{$n_{\max} \geq \theta_{\mathrm{strong}}$}
+    \State $g^{*} \gets \arg\max_{g} (n[g], w[g])$  \Comment{lex order, ties by $w$}
+    \State \Return $(\mathrm{strong}, \{ g^{*} \}, \{ g^{*} \mapsto \mathrm{contrib}[g^{*}] \})$
+  \EndIf
+  \State $\mathcal{H} \gets \{ g : n[g] \geq \theta_{\mathrm{multi}} \}$
+  \If{$|\mathcal{H}| \geq 2$}
+    \State $G \gets$ top 4 elements of $\mathcal{H}$ by $w$
+    \State \Return $(\mathrm{multi}, G, \{ g \mapsto \mathrm{contrib}[g] : g \in G \})$
+  \EndIf
+  \State $\mathcal{P} \gets \{ g : n[g] \geq 1 \}$
+  \State $G \gets$ top 3 elements of $\mathcal{P}$ by $w$
+  \State \Return $(\mathrm{prism}, G, \{ g \mapsto \mathrm{contrib}[g] : g \in G \})$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{B.2 The Coherence Detector}
+
+\begin{algorithm}[H]
+\caption{Coherence Detector}
+\begin{algorithmic}[1]
+\Function{Cohere}{$\mathcal{M}$, $\kappa$}
+  \State $c \gets \{\}$
+  \For{$i \gets 1$ to $N$}
+    \State $c[\kappa(\rho_i)] \gets c[\kappa(\rho_i)] + 1$
+  \EndFor
+  \State $c_{\max} \gets \max_{k} c[k]$
+  \If{$c_{\max} \geq \theta_{\mathrm{bullseye}}$}
+    \State $k^{*} \gets \arg\max_{k} c[k]$
+    \State \Return $(\mathrm{bullseye}_{k^{*}}, c)$
+  \EndIf
+  \State \Return $(\mathrm{prism}, c)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{B.3 Framing Selection}
+
+\begin{algorithm}[H]
+\caption{Frame}
+\begin{algorithmic}[1]
+\Function{Frame}{$v$, $c$, $\mathcal{F}$}
+  \If{$v = \mathrm{bullseye}_{k^{*}}$}
+    \State \Return $f_{k^{*}}$
+  \EndIf
+  \State $(k^{(1)}, k^{(2)}) \gets$ top two clusters by $c[k]$
+  \If{$(k^{(1)}, k^{(2)}) \in \mathrm{index}(\mathcal{F}_{\mathrm{pair}})$}
+    \State \Return $f_{\mathrm{pair}}(k^{(1)}, k^{(2)})$
+  \EndIf
+  \State \Return $f_{\mathrm{prism}}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{B.4 The Full Pipeline}
+
+The deployed pipeline composes the matcher, the aggregator, the coherence detector, and the framing selector into a single function. The matcher is shared with Region Resonances; the rest is specific to Grape Resonances.
+
+\begin{algorithm}[H]
+\caption{Grape Resonances Pipeline}
+\begin{algorithmic}[1]
+\Function{Respond}{$q$, $R$, $\sigma$, $\alpha$, $\mathcal{C}$, $\kappa$, $\mathcal{F}$}
+  \State $\mathbf{q} \gets E(q)$  \Comment{embed user query}
+  \State $\mathbf{s} \gets R \mathbf{q}$  \Comment{similarity vector, $59$ values}
+  \State $\mathcal{M} \gets$ top $N{=}5$ of $\mathbf{s}$ by value
+  \State $(m, G, T) \gets$ \Call{Aggregate}{$\mathcal{M}, \sigma, \alpha, \mathcal{C}$}
+  \State $(v, c) \gets$ \Call{Cohere}{$\mathcal{M}, \kappa$}
+  \State $f \gets$ \Call{Frame}{$v, c, \mathcal{F}$}
+  \State \Return $(G, f, T, v, m)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section*{C. Implementation}
+
+\subsection*{C.1 Runtime Environment}
+The aggregator and coherence detector are implemented in JavaScript and run in the user's browser. The matcher --- the embedding step in particular --- runs on the OpenAI API and is proxied through a Cloudflare Worker shared with Region Resonances. The shared Worker is documented in the Region Resonances Technical Appendix; no Worker modifications were required to support Grape Resonances.
+
+The full request flow is:
+
+\begin{enumerate}[leftmargin=2em,itemsep=0.2em]
+\item User types into the InputPanel component; the query is debounced (600 ms) to avoid flooding the API.
+\item The debounced query is sent to the Cloudflare Worker.
+\item The Worker forwards the query to OpenAI's embedding endpoint and returns the resulting vector to the browser.
+\item The browser computes the similarity vector against the pre-loaded \texttt{region\_embeddings.json} (1.86 MB, fetched once on app load).
+\item The browser runs \Call{Aggregate}{$\mathcal{M}, \sigma, \alpha, \mathcal{C}$} and \Call{Cohere}{$\mathcal{M}, \kappa$} against the pre-loaded JSON data files, and renders the response in the OracleResponse component.
+\end{enumerate}
+
+No state is persisted server-side; no user query, no verification response, and no derived data are logged anywhere. The verification button's click sets local React state only.
+
+\subsection*{C.2 Data Shapes}
+The five data files loaded into the browser on app start are:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item \texttt{region\_embeddings.json} --- the matcher input; an array of 59 objects each with \texttt{id}, \texttt{region}, \texttt{country}, \texttt{metaphor}, \texttt{cluster}, \texttt{narrative}, and \texttt{embedding} (a 1536-element array of floats).
+\item \texttt{region\_grapes.json} --- the curated signatures; an object keyed by region name, each value being an object with \texttt{signature}, \texttt{lesser\_known}, \texttt{rare}, and \texttt{temperament\_seconds} arrays.
+\item \texttt{grape\_narratives.json} --- the per-grape character notes; an object keyed by canonical grape name, each value being a 1--2 sentence string.
+\item \texttt{cluster\_framings.json} --- the framing sentence bank; an object with six bullseye keys (one per cluster) and four prism keys (general plus three pairwise), each value being a single sentence.
+\item \texttt{grape\_aliases.json} --- the alias map; an object with 12 keys (regional spellings) and 12 values (canonical names).
+\end{itemize}
+
+Total static payload (excluding embeddings): approximately 75 KB uncompressed. The 1.86 MB embeddings file dominates the initial download.
+
+\subsection*{C.3 Complexity Analysis}
+Let $N = 5$ be the number of matched regions, $M = \max_\rho |\sigma(\rho)| = 4$ be the maximum signature list length, and $|\mathcal{C}| = 101$ be the canonical grape surface size.
+
+\paragraph{Matcher.} Embedding the query: one round-trip to the OpenAI API, dominated by network latency (typical 200--600 ms). Computing the similarity vector: $59 \times 1536 = 90{,}624$ multiply-add operations on the client; sub-millisecond. Top-$N$ extraction: $O(59 \log N)$ comparisons; immeasurable.
+
+\paragraph{Aggregator.} Alias resolution iterates $N \times M = 20$ entries with $O(1)$ lookups in $\mathcal{C}$ and $\mathrm{dom}(\alpha)$ each; tallying iterates the same $N M$ entries. Mode determination is $O(|\mathcal{C}|)$ in the worst case (linear scan over $n$, $w$); selection is $O(|\mathcal{C}| \log |\mathcal{C}|)$ if all 101 grapes need sorting by $w$, but in practice the multi and prism hot sets have $|\mathcal{H}|, |\mathcal{P}| \leq 15$. Total: well under 1 ms in practice.
+
+\paragraph{Coherence Detector.} Cluster counting iterates $N = 5$ entries; argmax over 6 clusters. $O(N)$ time.
+
+\paragraph{Framing Selection.} Constant-time lookup.
+
+The Grape Resonances pipeline beyond the matcher is well below any perceptible latency threshold. The dominant cost is the OpenAI API round-trip in the embedding step, which is shared with Region Resonances.
+
+\subsection*{C.4 Caching and Persistence}
+There is no client-side caching of query results across page reloads, by design. The same query is re-embedded on each request. This makes the pipeline simpler and makes the rate-limit behaviour of the Cloudflare Worker predictable. The 1.86 MB embeddings file is cached by the browser per standard HTTP semantics; reloads after a recent visit incur only the embedding-API round-trip.
+
+No persistent user state exists. The verification prompt's "yes / partially / no" click sets a React state value local to the current page session; it is not transmitted anywhere and does not survive page reload.
+
+\subsection*{C.5 Determinism in Production}
+Proposition 3 (\S A.10) states determinism for fixed inputs. Three production considerations affect this:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item \emph{Embedding model determinism.} The OpenAI \texttt{text-embedding-3-small} model is deterministic per the model's documentation: identical input strings yield bit-identical output vectors.
+\item \emph{Numerical precision.} The client-side similarity computation uses 64-bit floating point. Re-runs on the same hardware produce bit-identical results. Different hardware (e.g.\ a mobile device vs.\ a desktop) may produce results differing in the final few bits of the cosine values, but the differences are far below the threshold at which the top-$N$ ranking would change.
+\item \emph{Data file integrity.} The five JSON files are immutable at runtime. They are versioned in the git repository and shipped with the build; the deployed tool's behaviour depends only on the build artefacts.
+\end{itemize}
+
+These considerations support, rather than weaken, the determinism property: the same query on the same deployed build produces the same response.
+
+\subsection*{C.6 Failure Modes (Implementation)}
+The implementation handles the following failure modes:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item \emph{Worker timeout.} If the Cloudflare Worker does not respond within 10 seconds, the InputPanel displays an error message. The page state remains responsive; the user can resubmit.
+\item \emph{Empty signature set.} If a matched region's $\bar\sigma(\rho)$ is empty after alias resolution (all signature grapes silent-skipped), the region contributes nothing to the aggregator. In the deployed corpus this does not occur; every region's signature contains at least one canonical or aliased grape. The path is tested against a synthetic-region case in the unit test suite.
+\item \emph{No grape recurrence and empty prism set.} If $\mathcal{P} = \emptyset$ --- all five matched regions silent-skipped every signature grape --- the aggregator returns an empty $G$. The OracleResponse component falls back to a graceful empty-state message. In the deployed corpus this cannot occur.
+\item \emph{Network failure between embedding and similarity.} Caught at the fetch boundary; same handling as Worker timeout.
+\end{itemize}
+
+\section*{D. References}
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item Cormen, T. H., Leiserson, C. E., Rivest, R. L. \& Stein, C. (2009). \emph{Introduction to Algorithms}, 3rd ed.\ MIT Press. Chapter 9 (selection algorithms).
+\item Knuth, D. E. (1998). \emph{The Art of Computer Programming, Volume 3: Sorting and Searching}, 2nd ed.\ Addison-Wesley. Section 6.1 (sequential search).
+\item Manning, C. D., Raghavan, P. \& Sch\"utze, H. (2008). \emph{Introduction to Information Retrieval}. Cambridge University Press. Chapter 14 (vector classification).
+\item Mikolov, T., Chen, K., Corrado, G. \& Dean, J. (2013). Efficient estimation of word representations in vector space. \emph{arXiv:1301.3781}.
+\item OpenAI (2024). New embedding models and API updates. Technical announcement covering \texttt{text-embedding-3-small} and \texttt{text-embedding-3-large}.
+\item Robinson, J., Harding, J. \& Vouillamoz, J. (2012). \emph{Wine Grapes: A Complete Guide to 1,368 Vine Varieties}. Allen Lane. Reference for canonical grape identities and alias relationships.
+\end{itemize}
+
+\end{document}
