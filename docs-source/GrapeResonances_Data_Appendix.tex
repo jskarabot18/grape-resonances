@@ -1,0 +1,380 @@
+\documentclass[11pt]{article}
+\usepackage{vinotheca}
+\usepackage{longtable}
+
+\providecommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\vinothecaTitle{Grape Resonances}{Data Appendix}{Corpus Listings, Curated Data, and Source Materials}
+\vinothecaAuthor{Jure Skarabot}{May 2026}
+\vinothecaCompanions{Summary \textperiodcentered{} Methods Primer \textperiodcentered{} Technical Appendix \textperiodcentered{} Data Appendix \textperiodcentered{} Region Reference (Identity)}
+
+This appendix presents the data the framework reads against: the 59 region corpus inherited from Region Resonances, the 101 canonical grape surface specific to Grape Resonances, the 12-entry alias map, the 11 silent-skipped non-canonical grapes, the 10 framing sentences in full, and the per-region signature curation produced across four sessions in May 2026. It also documents the curation methodology and source materials. The data files described here are static, locked at build time, and shipped as JSON with the deployed tool.
+
+\section*{A. The Region Corpus}
+
+\subsection*{A.1 The 59 Regions}
+
+The corpus is identical to Region Resonances, comprising 59 wine regions partitioned into the six Soul of Wine clusters established in Region Affinities. The table below gives each region's cluster, the one-word metaphor that opens its identity narrative, and the country (where the region is sub-national) or canonical regional identifier.
+
+\begin{small}
+\begin{longtable}{p{4.5cm} p{4cm} p{3cm} p{3cm}}
+\toprule
+\textbf{Region} & \textbf{Cluster} & \textbf{Metaphor} & \textbf{Country/Area} \\
+\midrule
+\endhead
+Burgundy                 & Old World Interior      & Devotion       & France \\
+Northern Rh\^one         & Old World Interior      & Solitude       & France \\
+Mosel                    & Old World Interior      & Poetry         & Germany \\
+Rheingau                 & Old World Interior      & Continuity     & Germany \\
+Tokaj                    & Old World Interior      & Melancholy     & Hungary \\
+Campania                 & Old World Interior      & Memory         & Italy \\
+Etna                     & Old World Interior      & Revival        & Italy \\
+Piedmont                 & Old World Interior      & Severity       & Italy \\
+Galicia                  & Old World Interior      & Morri\~na      & Spain \\
+Santa Cruz Mountains     & Old World Interior      & Cost           & USA (CA) \\
+\midrule
+Beaujolais               & Outward Ease            & Joy            & France \\
+Provence                 & Outward Ease            & Tranquility    & France \\
+Veneto                   & Outward Ease            & Commerce       & Italy \\
+Marlborough              & Outward Ease            & Assertion      & New Zealand \\
+Walla Walla              & Outward Ease            & Community      & USA (WA) \\
+\midrule
+Dalmatian Coast          & Old World Exterior      & Tranquility    & Croatia \\
+Bordeaux                 & Old World Exterior      & Business       & France \\
+Champagne                & Old World Exterior      & Society        & France \\
+Ch\^ateauneuf-du-Pape    & Old World Exterior      & Generosity     & France \\
+Baden                    & Old World Exterior      & Warmth         & Germany \\
+Pfalz                    & Old World Exterior      & Generosity     & Germany \\
+Rioja                    & Old World Exterior      & Patience       & Spain \\
+\midrule
+Wagram                   & Against the Odds        & Earth          & Austria \\
+Jura                     & Against the Odds        & Eccentricity   & France \\
+Macedonia                & Against the Odds        & Austerity      & Greece \\
+Santorini                & Against the Odds        & Survival       & Greece \\
+Liguria                  & Against the Odds        & Intimacy       & Italy \\
+Sardinia                 & Against the Odds        & Stubbornness   & Italy \\
+Douro                    & Against the Odds        & Endurance      & Portugal \\
+Ribera del Duero         & Against the Odds        & Severity       & Spain \\
+Barossa Valley           & Against the Odds        & Fortitude      & Australia \\
+Hunter Valley            & Against the Odds        & Defiance       & Australia \\
+\midrule
+Sicily                   & New World Reinvention   & Resurrection   & Italy \\
+Catalonia                & New World Reinvention   & Rebellion      & Spain \\
+Mendoza                  & New World Reinvention   & Acceleration   & Argentina \\
+Patagonia                & New World Reinvention   & Extremity      & Argentina \\
+Central Otago            & New World Reinvention   & Adventure      & New Zealand \\
+Stellenbosch             & New World Reinvention   & Aspiration     & South Africa \\
+Swartland                & New World Reinvention   & Rebellion      & South Africa \\
+Columbia Valley          & New World Reinvention   & Ambition       & USA (WA) \\
+Finger Lakes             & New World Reinvention   & Conviction     & USA (NY) \\
+Napa Valley              & New World Reinvention   & Ambition       & USA (CA) \\
+Paso Robles              & New World Reinvention   & Independence   & USA (CA) \\
+Sonoma                   & New World Reinvention   & Authenticity   & USA (CA) \\
+\midrule
+Kamptal                  & The Moderates           & Discipline     & Austria \\
+Steiermark               & The Moderates           & Dialogue       & Austria \\
+Wachau                   & The Moderates           & Monumentality  & Austria \\
+Alsace                   & The Moderates           & Duality        & France \\
+Loire                    & The Moderates           & Sentimentality & France \\
+Nahe                     & The Moderates           & Subtlety       & Germany \\
+Alto Adige               & The Moderates           & Precision      & Italy \\
+Friuli-Venezia Giulia    & The Moderates           & Clarity        & Italy \\
+Tuscany                  & The Moderates           & Art            & Italy \\
+Gori\v{s}ka Brda         & The Moderates           & Fortune        & Slovenia \\
+Margaret River           & The Moderates           & Composure      & Australia \\
+Maipo Valley             & The Moderates           & Pride          & Chile \\
+Hawke's Bay              & The Moderates           & Confidence     & New Zealand \\
+Santa Barbara            & The Moderates           & Serendipity    & USA (CA) \\
+Willamette Valley        & The Moderates           & Idealism       & USA (Oregon) \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+\subsection*{A.2 The Embedding Model and Operating Characteristics}
+
+The embedding model is OpenAI's \texttt{text-embedding-3-small}, the same model used by Region Resonances and used unchanged in Grape Resonances. It produces unit-normalised 1536-dimensional vectors. The 59 region passages (the metaphor concatenated with the full Layer 1 identity narrative) are embedded once at build time; the resulting matrix $R \in \R^{59 \times 1536}$ is shipped with the tool as \texttt{region\_embeddings.json}.
+
+The empirical operating range of cosine similarity on this corpus is approximately $[0.15, 0.65]$ for natural-language English queries, narrowing toward $[0.15, 0.45]$ for typical short-phrase queries and broadening toward $[0.55, 0.70]$ when the query is itself a paraphrase of source narrative. Values outside these ranges occur only for pathological inputs. The full operating-characteristic discussion appears in the Region Resonances Data Appendix; the matcher-stage display behaviour is unchanged in Grape Resonances.
+
+\section*{B. The Canonical 101-Grape Surface}
+
+The canonical grape surface $\mathcal{C}$ is the set of grape names that the response pool is closed to. It contains 101 entries partitioned into 53 reds and 48 whites. The surface is locked at build time. Eleven grapes that appear in regional signature curations but are not on the canonical surface are documented in \S D.
+
+\subsection*{B.1 Red Grapes (53)}
+
+\begin{small}
+\noindent
+Aglianico \textperiodcentered{} Baga \textperiodcentered{} Barbera \textperiodcentered{} Blaufr\"ankisch \textperiodcentered{} Bobal \textperiodcentered{} Cabernet Franc \textperiodcentered{} Cabernet Sauvignon \textperiodcentered{} Carignan \textperiodcentered{} Carm\'en\`ere \textperiodcentered{} Cinsault \textperiodcentered{} Corvina \textperiodcentered{} Counoise \textperiodcentered{} Dolcetto \textperiodcentered{} Frappato \textperiodcentered{} Gamay \textperiodcentered{} Garnacha Tintorera \textperiodcentered{} Graciano \textperiodcentered{} Grenache \textperiodcentered{} Kadarka \textperiodcentered{} Lagrein \textperiodcentered{} Limniona \textperiodcentered{} Malbec \textperiodcentered{} Mavrud \textperiodcentered{} Menc\'ia \textperiodcentered{} Merlot \textperiodcentered{} Monastrell \textperiodcentered{} Montepulciano \textperiodcentered{} Mourv\`edre \textperiodcentered{} Nebbiolo \textperiodcentered{} Negroamaro \textperiodcentered{} Nerello Mascalese \textperiodcentered{} Nero d'Avola \textperiodcentered{} Petit Verdot \textperiodcentered{} Petite Sirah \textperiodcentered{} Pinot Noir \textperiodcentered{} Pinotage \textperiodcentered{} Plavac Mali \textperiodcentered{} Poulsard \textperiodcentered{} Primitivo \textperiodcentered{} Sagrantino \textperiodcentered{} Sangiovese \textperiodcentered{} Schiava \textperiodcentered{} St.~Laurent \textperiodcentered{} Syrah \textperiodcentered{} Tannat \textperiodcentered{} Tempranillo \textperiodcentered{} Tinta Roriz \textperiodcentered{} Touriga Franca \textperiodcentered{} Touriga Nacional \textperiodcentered{} Trousseau \textperiodcentered{} Xinomavro \textperiodcentered{} Zinfandel \textperiodcentered{} Zweigelt.
+\end{small}
+
+\subsection*{B.2 White Grapes (48)}
+
+\begin{small}
+\noindent
+Albari\~no \textperiodcentered{} Aligot\'e \textperiodcentered{} Arinto \textperiodcentered{} Arneis \textperiodcentered{} Assyrtiko \textperiodcentered{} Chardonnay \textperiodcentered{} Chasselas \textperiodcentered{} Chenin Blanc \textperiodcentered{} Clairette \textperiodcentered{} Colombard \textperiodcentered{} Cortese \textperiodcentered{} Encruzado \textperiodcentered{} Falanghina \textperiodcentered{} Fiano \textperiodcentered{} Friulano \textperiodcentered{} Furmint \textperiodcentered{} Garganega \textperiodcentered{} Gew\"urztraminer \textperiodcentered{} Godello \textperiodcentered{} Greco \textperiodcentered{} Gr\"uner Veltliner \textperiodcentered{} Loureiro \textperiodcentered{} Malagousia \textperiodcentered{} Malvasia \textperiodcentered{} Marsanne \textperiodcentered{} Mauzac \textperiodcentered{} Melon de Bourgogne \textperiodcentered{} M\"uller-Thurgau \textperiodcentered{} Muscat Blanc \textperiodcentered{} Petit Manseng \textperiodcentered{} Pinot Blanc \textperiodcentered{} Pinot Gris \textperiodcentered{} Ribolla Gialla \textperiodcentered{} Riesling \textperiodcentered{} Roussanne \textperiodcentered{} Sauvignon Blanc \textperiodcentered{} Silvaner \textperiodcentered{} S\'emillon \textperiodcentered{} Torront\'es \textperiodcentered{} Trebbiano \textperiodcentered{} Ugni Blanc \textperiodcentered{} Verdejo \textperiodcentered{} Verdelho \textperiodcentered{} Verdicchio \textperiodcentered{} Vermentino \textperiodcentered{} Vidiano \textperiodcentered{} Viognier \textperiodcentered{} Welschriesling.
+\end{small}
+
+\subsection*{B.3 Per-Grape Narratives}
+
+Each canonical grape has a one- to two-sentence character note in Soul of Wine voice, stored in \texttt{grape\_narratives.json}. The notes are character-focused rather than tasting-note-focused: they describe what the grape \emph{is} in the project's framework rather than what its wines taste like. The notes were drafted under a methodology that prohibited cross-referencing against the existing notes, to prevent voice drift, and were reviewed for stylistic recurrences after completion. They are not reproduced in full here because of their volume; they surface in the trace fold of every Grape Resonances response.
+
+\section*{C. The Alias Map}
+
+The alias file \texttt{grape\_aliases.json} contains 12 entries mapping a regional spelling to its canonical name. Each entry records a one-to-one botanical correspondence.
+
+\begin{small}
+\begin{longtable}{p{6cm} p{5cm}}
+\toprule
+\textbf{Regional Spelling} & \textbf{Canonical Name} \\
+\midrule
+\endhead
+Spätburgunder              & Pinot Noir \\
+Shiraz                     & Syrah \\
+Pinot Grigio               & Pinot Gris \\
+Pinot Bianco               & Pinot Blanc \\
+Weissburgunder             & Pinot Blanc \\
+Grauburgunder              & Pinot Gris \\
+Tinto Fino                 & Tempranillo \\
+Cannonau                   & Grenache \\
+Garnatxa                   & Grenache \\
+Carinyena                  & Carignan \\
+Carignano                  & Carignan \\
+Hunter Valley Semillon     & S\'emillon \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+The alias resolution preserves the regional spelling in the disclosed trace. A response that includes Syrah, drawn from Walla Walla and Barossa Valley, shows the trace as \emph{Walla Walla --- community} and \emph{Barossa Valley --- fortitude \textperiodcentered{} as Shiraz}. The user sees both that the alias resolution occurred and what the regional spelling was.
+
+\section*{D. The Silent-Skip List}
+
+Eleven signature grapes that appear in regional curations are neither canonical (in the 101-grape surface) nor aliased to a canonical name. These are silent-skipped from the response pool by the aggregator: the region still contributes whatever canonical or aliased grapes it has, but the non-canonical grape is not counted toward any recurrence. The list is documented and may expand in a future version of the canonical surface.
+
+\begin{small}
+\begin{longtable}{p{4cm} p{8cm}}
+\toprule
+\textbf{Grape} & \textbf{Primary Region(s) of Signature Appearance} \\
+\midrule
+\endhead
+Carricante           & Etna (signature; partner to Nerello Mascalese) \\
+Glera                & Veneto (signature; Prosecco's base variety) \\
+Greco di Tufo        & Campania (signature; DOCG variety) \\
+Grillo               & Sicily (signature; Marsala and modern dry whites) \\
+Macabeu              & Catalonia (signature; Cava base variety) \\
+Pigato               & Liguria (signature; coastal Ligurian white) \\
+Pinot Meunier        & Champagne (signature; the third of the three Champagne grapes) \\
+Po\v{s}ip            & Dalmatian Coast (signature; Korčula island white) \\
+Rebula               & Gori\v{s}ka Brda (signature; the Slovenian name for Ribolla Gialla) \\
+Rossese              & Liguria (signature; Rossese di Dolceacqua) \\
+Savagnin             & Jura (signature; vin jaune base variety) \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+Note that Rebula appears here despite Ribolla Gialla being on the canonical surface. The alias file does not contain a Rebula $\rightarrow$ Ribolla Gialla mapping in the v1 release; the two names are treated as separate strings at the aggregator's lookup stage. This is a known v1 limitation; the planned addition to the alias file would resolve it in v1.1.
+
+\section*{E. The Framing Sentences}
+
+Ten one-sentence framings, hand-written in Soul of Wine voice, are stored in \texttt{cluster\_framings.json}. The coherence detector's verdict (\emph{bullseye for cluster k} or \emph{prism}) selects one of these as the framing line beneath the grape names in the response.
+
+\subsection*{E.1 Bullseye Framings (one per cluster)}
+
+\textbf{Old World Interior.} Your word points to the patient, custodial cultures --- places where time is the essential ingredient and the winemaker is a keeper, not a maker.
+
+\textbf{Outward Ease.} Your word points to the communal cultures --- places where wine is part of the table, the market, the gathering, never separate from the company it keeps.
+
+\textbf{Old World Exterior.} Your word points to the cultures of inheritance --- places where wine is part of how the society organises itself: through family, through trade, through patience, through the long table.
+
+\textbf{Against the Odds.} Your word points to the cultures of endurance --- places where difficulty is not an obstacle but the substance.
+
+\textbf{New World Reinvention.} Your word points to the cultures of conviction-without-evidence --- places that decided they should exist and then made themselves.
+
+\textbf{The Moderates.} Your word points to the cultures of found voice --- places that arrived at their own centre, each by a different route, none by choosing the loudest register.
+
+\subsection*{E.2 Prism Framings}
+
+\textbf{General prism.} Your word refracts. In this framework's reading, it is not one feeling but several --- the regions your phrase pulls belong to different temperaments, each holding a facet of what you brought.
+
+\textbf{Interior $\times$ Reinvention prism} (Old World Interior crossed with New World Reinvention). Your word holds a tension between patient inheritance and chosen invention --- wine cultures that arrived at depth by very different routes.
+
+\textbf{Difficulty $\times$ Ease prism} (Against the Odds crossed with Outward Ease). Your word holds a tension between difficulty and ease --- wine cultures that found themselves under pressure beside cultures that found themselves at the table.
+
+\textbf{Interior $\times$ Moderate prism} (Old World Interior crossed with The Moderates). Your word holds a tension between the cultures of long depth and the cultures of found equilibrium --- different settlements of the same question about how to make wine seriously.
+
+\section*{F. Per-Region Signature Curation}
+
+For each of the 59 regions, the curated file \texttt{region\_grapes.json} associates the region with three tiers of grape varieties (\emph{signature}, \emph{lesser known}, \emph{rare}) and a derived field (\emph{temperament seconds}) drawn from the lesser-known tier. The signature tier is the only tier the v1 aggregator reads. The full per-region signature lists are given below, with the temperament-seconds field (a single grape per region, possibly empty) in the rightmost column.
+
+\begin{small}
+\begin{longtable}{p{3.5cm} p{6cm} p{3cm}}
+\toprule
+\textbf{Region} & \textbf{Signature Grapes} & \textbf{Temperament Seconds} \\
+\midrule
+\endhead
+\multicolumn{3}{l}{\textit{Old World Interior}} \\
+Burgundy             & Pinot Noir, Chardonnay                                       & Aligot\'e \\
+Northern Rh\^one     & Syrah                                                        & Marsanne \\
+Mosel                & Riesling                                                     & Elbling \\
+Rheingau             & Riesling                                                     & Spätburgunder \\
+Tokaj                & Furmint                                                      & Hárslevelű \\
+Campania             & Aglianico, Fiano, Greco di Tufo                              & Piedirosso \\
+Etna                 & Nerello Mascalese, Carricante                                & Nerello Cappuccio \\
+Piedmont             & Nebbiolo                                                     & Freisa \\
+Galicia              & Albari\~no, Menc\'ia, Godello                                & Treixadura \\
+Santa Cruz Mountains & Pinot Noir, Cabernet Sauvignon                               & Zinfandel \\
+\midrule
+\multicolumn{3}{l}{\textit{Outward Ease}} \\
+Beaujolais           & Gamay                                                        & (empty) \\
+Provence             & Grenache                                                     & Cinsault \\
+Veneto               & Glera, Garganega, Corvina                                    & Pinot Grigio \\
+Marlborough          & Sauvignon Blanc                                              & (empty) \\
+Walla Walla          & Cabernet Sauvignon, Syrah                                    & Merlot \\
+\midrule
+\multicolumn{3}{l}{\textit{Old World Exterior}} \\
+Dalmatian Coast      & Plavac Mali, Po\v{s}ip                                       & Babi\'c \\
+Bordeaux             & Cabernet Sauvignon, Merlot                                   & S\'emillon \\
+Champagne            & Pinot Noir, Chardonnay, Pinot Meunier                        & Pinot Gris (Fromenteau) \\
+Ch\^ateauneuf-du-Pape & Grenache, Syrah, Mourv\`edre                                & Counoise \\
+Baden                & Spätburgunder, Grauburgunder, Weissburgunder                 & Gutedel \\
+Pfalz                & Riesling, Spätburgunder                                      & Dornfelder \\
+Rioja                & Tempranillo                                                  & Graciano \\
+\midrule
+\multicolumn{3}{l}{\textit{Against the Odds}} \\
+Wagram               & Gr\"uner Veltliner                                           & Roter Veltliner \\
+Jura                 & Savagnin, Chardonnay, Poulsard                               & Trousseau \\
+Macedonia            & Xinomavro                                                    & Assyrtiko \\
+Santorini            & Assyrtiko                                                    & Aidani \\
+Liguria              & Pigato, Vermentino, Rossese                                  & Bosco \\
+Sardinia             & Cannonau, Vermentino, Carignano                              & Vernaccia di Oristano \\
+Douro                & Touriga Nacional, Touriga Franca, Tinta Roriz                & Tinto C\~ao \\
+Ribera del Duero     & Tinto Fino                                                   & Albillo \\
+Barossa Valley       & Shiraz                                                       & Grenache \\
+Hunter Valley        & Semillon, Shiraz                                             & Verdelho \\
+\midrule
+\multicolumn{3}{l}{\textit{New World Reinvention}} \\
+Sicily               & Nero d'Avola, Grillo                                         & Perricone \\
+Catalonia            & Garnatxa, Carinyena, Macabeu                                 & Xarel\textperiodcentered{}lo \\
+Mendoza              & Malbec, Cabernet Sauvignon                                   & Cabernet Franc \\
+Patagonia            & Pinot Noir, Malbec                                           & S\'emillon \\
+Central Otago        & Pinot Noir                                                   & (empty) \\
+Stellenbosch         & Cabernet Sauvignon, Chenin Blanc                             & Cabernet Franc \\
+Swartland            & Chenin Blanc, Syrah                                          & Cinsault \\
+Columbia Valley      & Cabernet Sauvignon, Merlot, Syrah                            & Riesling \\
+Finger Lakes         & Riesling                                                     & Cabernet Franc \\
+Napa Valley          & Cabernet Sauvignon, Merlot                                   & Zinfandel \\
+Paso Robles          & Zinfandel, Cabernet Sauvignon, Syrah                         & Mourv\`edre \\
+Sonoma               & Pinot Noir, Chardonnay, Zinfandel, Cabernet Sauvignon        & Carignan \\
+\midrule
+\multicolumn{3}{l}{\textit{The Moderates}} \\
+Kamptal              & Gr\"uner Veltliner, Riesling                                 & Zweigelt \\
+Steiermark           & Sauvignon Blanc, Welschriesling                              & Gelber Muskateller \\
+Wachau               & Riesling, Gr\"uner Veltliner                                 & (empty) \\
+Alsace               & Riesling, Gewürztraminer, Pinot Gris                         & Muscat \\
+Loire                & Chenin Blanc, Sauvignon Blanc, Cabernet Franc                & Pineau d'Aunis \\
+Nahe                 & Riesling                                                     & Silvaner \\
+Alto Adige           & Pinot Grigio, Gewürztraminer, Pinot Bianco                   & Kerner \\
+Friuli-Venezia Giulia & Friulano, Pinot Grigio                                      & Ribolla Gialla \\
+Tuscany              & Sangiovese, Cabernet Sauvignon, Merlot                       & Canaiolo \\
+Gori\v{s}ka Brda     & Rebula, Merlot                                               & Pinela \\
+Margaret River       & Cabernet Sauvignon, Chardonnay                               & Semillon \\
+Maipo Valley         & Cabernet Sauvignon                                           & Carm\'en\`ere \\
+Hawke's Bay          & Cabernet Sauvignon, Merlot, Chardonnay                       & Syrah \\
+Santa Barbara        & Pinot Noir, Chardonnay                                       & Syrah \\
+Willamette Valley    & Pinot Noir                                                   & Gamay \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+The full per-region tier data, including the \emph{lesser known} and \emph{rare} entries (which the v1 aggregator does not read), is shipped as \texttt{region\_grapes.json} with the deployed tool and is available in the source repository.
+
+\section*{G. Curation Methodology}
+
+\subsection*{G.1 Tier Definitions}
+
+The curation is governed by four field definitions, locked in the \texttt{\_metadata.curation\_rules} block of \texttt{region\_grapes.json}:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.1em]
+\item \emph{Signature} --- what the region is famous for; 1--4 grapes (4 used only when the regional identity is genuinely multi-pillar, e.g.\ Sonoma, Alsace). The v1 aggregator reads from this tier exclusively.
+\item \emph{Lesser known} --- recognised by occasional readers but not headline; the tier from which \emph{temperament seconds} is drawn.
+\item \emph{Rare} --- even moderately serious enthusiasts haven't heard; up to 4 entries; may be empty.
+\item \emph{Temperament seconds} --- the lesser-known grape that most embodies the region's identity. Always a subset of the lesser-known tier. May be empty for regions without natural Tier-2 candidates (Beaujolais, Marlborough, Central Otago, Wachau).
+\end{itemize}
+
+\subsection*{G.2 Curatorial Principles}
+
+Six principles were applied uniformly across all 59 regions:
+
+\begin{enumerate}[leftmargin=2em,itemsep=0.1em]
+\item \emph{Region-relative tiers, not market-relative.} Furmint is a signature grape in Tokaj despite being globally lesser-known; Pinot Grigio is a lesser-known grape in Veneto despite global ubiquity. The tier reflects the grape's position \emph{within the region's identity}, not its global standing.
+
+\item \emph{Do not retreat from the unfashionable signal.} When a region's narrative honours commerce, survival, or rebellion, pick the grape that carries that signal even if it is unprestigious. Pinot Grigio for Veneto's commerce, S\'emillon for Bordeaux's business, Dornfelder for Pfalz's generosity, Zinfandel for Napa's ambition, Carignan for Sonoma's authenticity --- all examples of the principle.
+
+\item \emph{Prefer region-specific over cluster-shared.} When two regions could plausibly share a temperament-seconds grape, pick the more region-specific answer for each. Same-grape repeats occur only when the role is genuinely distinct in each region.
+
+\item \emph{The grape with the worst commercial case often wins.} Particularly in Against the Odds and New World Reinvention, where the cluster signals favour endurance and rescue over commercial reasonableness.
+
+\item \emph{Empty is honest.} When a region is genuinely mono-grape or two-grape in its identity (Beaujolais's Gamay, Marlborough's Sauvignon Blanc, Wachau's Riesling-and-Gr\"uner pair, Central Otago's Pinot Noir), the empty temperament-seconds field is more truthful than a forced second choice.
+
+\item \emph{Cross-border continuums deserve recognition.} Where sibling regions share signatures across borders (Friuli/Brda, Steiermark/Slovenian \v{S}tajerska, Bordeaux/Spanish heritage), the temperament-seconds choice differentiates rather than mirrors, preserving the regional specificity within the shared variety pool.
+\end{enumerate}
+
+\subsection*{G.3 Same-Grape Cross-Region Patterns}
+
+Six grapes appear as temperament-seconds in two or more regions. Each has a distinct role in each region; the aggregator handles cross-region recurrence through the alias resolution and the role-distinct curation principle.
+
+\begin{small}
+\begin{longtable}{p{3cm} p{1cm} p{8cm}}
+\toprule
+\textbf{Grape} & \textbf{Count} & \textbf{Regions (with role)} \\
+\midrule
+\endhead
+Cabernet Franc      & 3 & Mendoza (acceleration), Stellenbosch (aspiration), Finger Lakes (conviction) \\
+S\'emillon          & 3 & Bordeaux (generosity), Patagonia (extremity-survival), Margaret River (composure) \\
+Zinfandel           & 2 & Santa Cruz Mountains (patient continuation), Napa Valley (quiet survival under ambition) \\
+Cinsault            & 2 & Provence (tranquility), Swartland (rebellion) \\
+Grenache            & 2 & Barossa Valley (pre-Shiraz survival), Paso Robles (Rh\^one-Ranger independence) \\
+Syrah               & 2 & Hawke's Bay (quiet confidence), Santa Barbara (serendipitous discovery) \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+\subsection*{G.4 Validation}
+
+The completed curation was validated on the following criteria, all passing across all 59 regions:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.1em]
+\item \emph{Subset rule.} Every temperament-seconds entry is contained in the corresponding lesser-known tier.
+\item \emph{Non-empty signatures.} Every region has at least one signature grape.
+\item \emph{Non-empty lesser-known.} Every region has at least one lesser-known grape.
+\item \emph{Empty temperament-seconds documented.} The four regions with empty temperament-seconds (Beaujolais, Marlborough, Central Otago, Wachau) are all single-grape or two-grape regional assertions where the signature itself is the identity.
+\end{itemize}
+
+The curation closed across four sessions over a one-day period (2026-05-10), with one mid-session subset-rule fix (Provence: Cinsault moved from signature to lesser-known to permit Grenache as sole signature) and one mid-session correction (Wachau: Gr\"uner Veltliner restored to signature alongside Riesling).
+
+\section*{H. Data File Inventory}
+
+The five data files loaded by the deployed tool are:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.1em]
+\item \texttt{region\_embeddings.json} --- the matcher's pre-computed region vectors; 1.86 MB; loaded once on app start. Shared with Region Resonances.
+\item \texttt{region\_grapes.json} --- the per-region tiered grape curation; 30 KB; the substrate for the aggregator.
+\item \texttt{grape\_narratives.json} --- the 101 per-grape character notes; 30 KB; surfaces in the trace fold.
+\item \texttt{cluster\_framings.json} --- the 10 framing sentences; 4 KB; surfaces below the grape names in the response.
+\item \texttt{grape\_aliases.json} --- the 12-entry alias map; 1 KB; consumed by the aggregator before tallying.
+\end{itemize}
+
+All files are static, locked at build time, and shipped with the React build. None is regenerated, modified, or re-tuned at runtime.
+
+\section*{I. References}
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item d'Agata, I. (2014). \emph{Native Wine Grapes of Italy}. University of California Press.
+\item Galet, P. (2000). \emph{Dictionnaire encyclop\'edique des c\'epages}. Hachette.
+\item Robinson, J. \& Harding, J. (eds.) (2015). \emph{The Oxford Companion to Wine}, 4th ed.\ Oxford University Press.
+\item Robinson, J., Harding, J. \& Vouillamoz, J. (2012). \emph{Wine Grapes: A Complete Guide to 1,368 Vine Varieties}. Allen Lane. Primary reference for canonical grape identities, alias relationships, and the silent-skip determinations.
+\item OpenAI (2024). New embedding models and API updates. Technical announcement covering \texttt{text-embedding-3-small} and \texttt{text-embedding-3-large}.
+\end{itemize}
+
+\end{document}
