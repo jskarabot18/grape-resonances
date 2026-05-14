@@ -1,0 +1,189 @@
+\documentclass[11pt]{article}
+\usepackage{vinotheca}
+
+\providecommand{\R}{\mathbb{R}}
+\providecommand{\inner}[2]{\langle #1, #2 \rangle}
+\providecommand{\norm}[1]{\lVert #1 \rVert}
+
+\begin{document}
+
+\vinothecaTitle{Grape Resonances}{Methods Primer}{A Plain-Language Guide to the Aggregator, the Coherence Detector, and Alias Resolution}
+\vinothecaAuthor{Jure Skarabot}{May 2026}
+\vinothecaCompanions{Summary \textperiodcentered{} Methods Primer \textperiodcentered{} Technical Appendix \textperiodcentered{} Data Appendix \textperiodcentered{} Region Reference (Identity)}
+
+\section*{Introduction}
+
+The Grape Resonances tool answers a question that has two halves: \emph{which regions does this feeling resemble?}, and then, \emph{given those regions, what do they grow?} The first half is solved by the same semantic-matching procedure that powers Region Resonances; the second half is solved by a small, structured lookup augmented by two interpretation rules that the rest of this primer explains.
+
+This primer assumes no prior exposure to the techniques. It is written for a reader who is comfortable with arithmetic and elementary set theory, who has not necessarily seen text embeddings or nearest-neighbour search before, but who would like to understand what is happening when they enter a phrase into the tool and receive a small set of grape names in return. The matcher itself --- the embedding map, the unit sphere, the cosine-similarity score, the top-$k$ ranking --- is treated lightly here because it is the same matcher used by Region Resonances; readers wanting the full plain-language treatment of those steps should consult the companion \emph{Region Resonances Methods Primer}. The technical depth of the present document is on what Grape Resonances adds: the aggregator's recurrence rule, the coherence detector's cluster rule, alias resolution, and the design choice of a compressed response.
+
+\section{The Matcher in One Page}
+
+\paragraph{The substrate.}
+The tool reads against a corpus of 59 wine regions, each represented by a roughly 300-word identity narrative drawn from the Soul of Wine project. Each region has a one-word metaphor (Burgundy is \emph{Devotion}, Tokaj is \emph{Melancholy}, Mosel is \emph{Poetry}) and a longer passage that develops the metaphor. The 59 passages are the only inputs the matcher reads.
+
+\paragraph{Converting text to numbers.}
+A function called an \emph{embedding map} converts each text passage into a list of 1536 numbers. The function was learned by a large language model trained on enormous quantities of English text; the practical consequence is that passages with similar meanings produce similar lists of numbers. The tool uses OpenAI's \texttt{text-embedding-3-small} model for this step. The 59 region passages are passed through the embedding map once, at build time, and the resulting 59 vectors are shipped with the tool.
+
+\paragraph{Comparing two lists of numbers.}
+When the user types a query, the same embedding map converts the query into a 1536-number list. The tool then needs to ask, for each of the 59 regions: \emph{how similar is the query to this region?} The answer is computed by a quantity called \emph{cosine similarity}, which is high when two lists of numbers point in similar directions and low when they point in different directions. Cosine similarity ranges from $-1$ to $+1$, but for natural-language English the values produced by this embedding model concentrate in a narrow band, roughly $0.15$ to $0.65$, regardless of how good a match the two passages actually are.
+
+\paragraph{Ranking the regions.}
+The cosine similarities for all 59 regions are computed and sorted in descending order. The top five regions are passed to the next stage of the pipeline. The bottom 54 are not used.
+
+\medskip
+\noindent\emph{That is the matcher in full.} Everything in the rest of this primer happens after the top five regions have been selected.
+
+\section{What the Lookup Adds}
+
+The matcher gives the tool five matched regions. By itself this is the entire Region Resonances response: those five regions are what the user sees, ranked by similarity. Grape Resonances adds a question the matcher cannot answer: \emph{given these five regions, what are the grapes that hold this feeling?}
+
+\paragraph{The data the tool reads.}
+For each of the 59 regions, the project has hand-curated a list of grape varieties grown there, sorted into three tiers:
+
+\begin{itemize}[leftmargin=2em,itemsep=0.1em]
+\item \emph{Signature} --- the grapes the region is famous for. One to four entries per region.
+\item \emph{Lesser known} --- grapes that occasional readers would recognise but are not the region's headline.
+\item \emph{Rare} --- grapes that even moderately serious enthusiasts might not have heard of.
+\end{itemize}
+
+A fourth derived field, \emph{temperament seconds}, marks the lesser-known grape that most embodies the region's identity. The full curated file is \texttt{region\_grapes.json}, and the curation principles are documented in the \emph{Data Appendix}. For the v1 aggregator, only the signature tier is read; the lesser-known and rare tiers are present for future extension but unused in the current response logic.
+
+\paragraph{The conceptual move.}
+The matcher gives the tool an ordered list of five regions. The lookup converts each region into a small set of signature grapes. The aggregator then has to decide, given the five short grape lists, what to return as the response. This is the heart of the methodology, and the next two sections explain how the decision is made.
+
+\section{The Aggregator: Recurrence as Finding}
+
+The aggregator is a small rule that converts five matched regions and their signature-grape lists into one to four response grape names. The rule is governed by a single principle: \emph{when a grape recurs across multiple matched regions as a signature, the recurrence itself is the finding.}
+
+\paragraph{Why recurrence.}
+Suppose the matcher returned five regions for the query \emph{old soul}, and three of those five regions list Pinot Noir as a signature grape. The naive response would average across all the regions and report the union of their signature grapes: perhaps Pinot Noir, Chardonnay, Riesling, Cabernet Franc, Furmint, depending on which five regions appeared. This response is technically true but uninformative; the user cannot tell from it that one grape, Pinot Noir, recurred in three of the five regions while the others appeared only once.
+
+The framework adopts a different stance. Recurrence is itself a fact about the matched-region set, and the framework names that fact. The response should be \emph{Pinot Noir} alone, framed by the recurrence: \emph{Pinot Noir appeared as the signature of three of five matched regions}.
+
+\paragraph{Counting the recurrences.}
+The aggregator counts, for each grape that appears in any signature list, how many of the five matched regions name that grape. This gives an integer count from 1 to 5 for each grape. The counts are the inputs to the selection rule.
+
+\paragraph{Three modes.}
+The selection rule has three exhaustive cases, each producing a different shape of response.
+
+\emph{Strong recurrence.} If one grape appears in three or more of the five matched regions, the response is that grape alone. The framing names the recurrence: \emph{appeared as the signature of three of five matched regions}, with the contributing regions listed by name in the trace fold. This case is rare in live use --- a finding we did not anticipate at the design stage --- because the matcher operates on regional temperament narratives and the recurrence rule operates on signature-grape distribution, and the two dimensions are not naturally correlated. Strong recurrence fires only when the matcher happens to land three regions that share a signature, which generally requires the query to be tuned to a regionally concentrated grape (Pinot Noir is a signature in eight regions; Cabernet Sauvignon in thirteen; Riesling in eight; Chardonnay in seven; almost every other grape is a signature in one to three regions only).
+
+\emph{Multi-bullseye.} If two to four grapes each appear in two or more of the five matched regions, the response is the list of those grapes (capped at four). The framing names the shared temperament. This is the empirically common case --- most live queries produce a multi-bullseye response. The number of returned grapes is typically two or three.
+
+\emph{Prism.} If no grape recurs across regions --- every grape in every region's signature appears only once across the five matched regions --- the response is the top two to three grapes by similarity-weighted score. The framing names the prism: the matched regions did not share a grape, so the response presents several grapes each carrying one facet of the feeling. This case is also rare; it requires the matched regions to be sufficiently diverse in their signatures that nothing recurs at all.
+
+\paragraph{Why the threshold of two.}
+The multi-bullseye threshold is set at two of five regions sharing a signature. Two is the smallest count that constitutes recurrence (one is not recurrence; it is a single occurrence). Lower would dilute the principle; higher would push almost all queries into the prism case, since recurrence above two-of-five is uncommon. The design intent is to honour any recurrence that exists, however small, while preserving the prism case as a real fallback for queries that genuinely refract.
+
+\section{Alias Resolution}
+
+The same grape variety is sometimes grown under different regional names. Spätburgunder, the German name for Pinot Noir, refers to the same vine; Shiraz, the Australian and South African name for Syrah, is the same species; Tinto Fino is Tempranillo as planted in Ribera del Duero. These are not stylistic variants; they are the same botanical variety. The framework treats them as such.
+
+\paragraph{The alias file.}
+A small lookup file, \texttt{grape\_aliases.json}, contains 12 entries mapping a regional spelling to its canonical name. The full list is in the Data Appendix. Each entry records a one-to-one substitution that the aggregator applies after reading a region's signature but before counting recurrences. The result: if Burgundy's signature includes Pinot Noir and Pfalz's signature includes Spätburgunder, the aggregator counts Pinot Noir as appearing in two of five matched regions, not as Pinot Noir-in-one and Spätburgunder-in-one. The recurrence rule fires correctly across the cultural divide.
+
+\paragraph{What aliasing is not.}
+The alias file is not deduplication of synonyms in the loose sense. It does not collapse stylistic terms (\emph{Old World Pinot} and \emph{New World Pinot} remain unaliased, because they refer to expressions, not varieties). It does not enable fuzzy matching (typographical errors are not corrected). It performs only the precise botanical substitution where the regional name refers to the same vine.
+
+\paragraph{What the trace preserves.}
+The trace fold --- the disclosure the user can expand to see how the framework arrived at the response --- preserves the regional spelling. A response that includes Syrah, drawn from Walla Walla and Barossa Valley, will show the trace as \emph{Walla Walla --- community} and \emph{Barossa Valley --- fortitude $\cdot$ as Shiraz}. The user sees both that the alias resolution occurred and what the regional spelling was. This is a deliberate design choice: aliasing makes the recurrence rule work without erasing the cultural specificity of the regional naming.
+
+\paragraph{Non-canonical grapes.}
+Eleven signature grapes across the 59 regions are neither canonical (in the 101-grape surface used by the response pool) nor aliased to a canonical name. These are Carricante, Glera, Greco di Tufo, Grillo, Macabeu, Pigato, Pinot Meunier, Po\v{s}ip, Rebula, Rossese, and Savagnin. When such a grape appears in a matched region's signature, the aggregator silently skips it. The region still contributes whatever canonical or aliased grapes it has, but the non-canonical one is not counted toward any recurrence. The list is documented and may expand in a future version of the canonical surface.
+
+\section{The Coherence Detector}
+
+In parallel with the aggregator, a second small classifier examines the same five matched regions. It does not count grapes; it counts \emph{clusters}.
+
+\paragraph{The cluster substrate.}
+Each of the 59 regions belongs to one of six clusters established by the Region Affinities study: Old World Interior, Outward Ease, Old World Exterior, Against the Odds, New World Reinvention, and The Moderates. The cluster labels are stable properties of each region's identity narrative; they do not change at query time.
+
+\paragraph{The bullseye-prism rule.}
+The coherence detector applies a single rule to the five matched regions: if four or more of the five regions belong to the same cluster, classify the response as \emph{bullseye} for that cluster. Otherwise classify as \emph{prism}.
+
+The bullseye case is read as the matcher converging on a single temperament: the query's feeling pulls regions of one shared cultural register. The prism case is read as the query refracting: the feeling resonates with regions of multiple temperaments, each carrying a facet.
+
+\paragraph{Why the threshold of four.}
+A threshold of three would have allowed any majority to count as bullseye, which is too permissive --- three of five is not yet strong cluster convergence. A threshold of five would have required perfect cluster purity, which almost never occurs in a corpus where temperaments are subtle and clusters bleed into one another at the edges. Four of five is the smallest count that constitutes strong convergence while still permitting one region from elsewhere; live use has confirmed it produces appropriate classifications.
+
+\paragraph{Two independent classifiers.}
+The aggregator (which counts grape recurrence) and the coherence detector (which counts cluster recurrence) run independently on the same matched-region set. They can produce apparently inconsistent verdicts: the aggregator may classify a query as multi-bullseye (two or three grapes recur) while the coherence detector classifies the same query as prism (the regions span multiple clusters). This is not a contradiction. The two classifiers are measuring different things: \emph{do the regions share grapes?} is independent of \emph{do the regions share a cultural cluster?}, and in practice the two recurrences often misalign. The framework presents the aggregator's verdict as the response (grape names) and the coherence detector's verdict as the framing (which sentence appears beneath the grape names). The two together carry more information than either alone.
+
+\section{The Framing Sentence}
+
+A small set of ten one-sentence framings, hand-written in advance and shipped with the tool, is selected based on the coherence detector's verdict.
+
+\paragraph{Six bullseye framings.}
+If the coherence detector classifies the response as bullseye for one of the six clusters, the framing sentence is selected from a per-cluster bank. The bank for Old World Interior reads, in part: \emph{Your word points to the patient, custodial cultures --- places where time is the essential ingredient and the winemaker is a keeper, not a maker.} Each cluster has its own register, and the bullseye case allows the framework to speak in that register precisely.
+
+\paragraph{Four prism framings.}
+If the coherence detector classifies the response as prism, a single general framing is used by default: \emph{Your word refracts. In this framework's reading, it is not one feeling but several --- the regions your phrase pulls belong to different temperaments, each holding a facet of what you brought.} Three additional pairwise framings exist for queries whose matched regions concentrate in exactly two clusters (Old World Interior crossed with New World Reinvention, The Moderates crossed with Against the Odds, Outward Ease crossed with Old World Exterior). The pairwise framings allow the framework to name what is happening when the prism has a clear dyad, rather than falling to the more general framing.
+
+\paragraph{Why a fixed set rather than generated text.}
+The framings are static text shipped in JSON, not generated at runtime. A language model could in principle write a fresh framing for every query, but doing so would lose three properties that the static set preserves: reproducibility (the same query always returns the same framing), authorial control (the framings are written in Soul of Wine voice, not in any voice the model defaults to), and resistance to drift (the framings cannot subtly change between queries or between users). For an oracle, these properties matter more than maximum surface variety.
+
+\section{The Response Surface}
+
+The aggregator and the coherence detector together produce four pieces of content for the response: the grape names (typically two to three), the framing sentence (one of the ten), the contributing-regions detail (which regions contributed which grapes, with similarity scores and cluster metaphors), and the per-grape narratives (one or two sentences per response grape, drawn from \texttt{grape\_narratives.json}). The response surface compresses these four into a small default with a disclosure.
+
+\paragraph{The default surface.}
+The user sees, by default, only two of the four content pieces: the grape names, separated by middle dots, and the framing sentence. A verification prompt (\emph{Does this resonate? yes / partially / no}) sits below. A single line --- \emph{See how the framework arrived at this} --- offers the disclosure that contains the rest. Nothing further appears unless the user clicks.
+
+\paragraph{Why this is methodological.}
+The compressed default is not a UI choice; it is part of the methodology. The framework is presented as an oracle, in the precise sense that the user receives a small, considered offering against which their own situation becomes legible. The methodological commitment behind oracle framing is that the user's attention is the most precious thing the tool consumes, and the tool earns its weight by being economical with that attention. A four-item response with the trace expanded is the same procedure as the compressed default --- the numbers and the framings are identical --- but the surfaces convey different relationships between the tool and the user.
+
+\paragraph{The trace fold.}
+When the user expands the disclosure, the four content pieces are arranged grape-by-grape. For each response grape, the user sees: the grape's name; the curated short narrative (one or two sentences in Soul of Wine voice); the count of matched regions in which the grape appeared as a signature; the list of those regions with their similarity scores and cluster metaphors, including the \emph{as Shiraz} or \emph{as Spätburgunder} annotation if the alias file fired; and an interpretive close sentence drawn from a small template bank (one sentence each for the strong-recurrence, multi-bullseye, and prism cases). After all response grapes have been shown, a single cross-link to Region Resonances appears: \emph{See this query in Region Resonances for the regional reading}. The fold ends there.
+
+\paragraph{Verification.}
+The verification prompt asks the user whether the response resonates. The user's click is captured as local state in the browser; no signal is sent anywhere. This is by design: the verification is presented as an invitation to reflection (\emph{did this read me?}), not as a feedback channel for tuning. Adding a feedback channel would change the relationship between the tool and the user from oracle to tool-in-development, and the framework is committed to the former.
+
+\section{Pipeline in Summary}
+
+The complete procedure, from user input to displayed response, runs in nine steps. Each step is deterministic; each is justified above; each is implemented exactly as described.
+
+\begin{enumerate}[leftmargin=2em,itemsep=0.2em]
+\item \emph{Embedding.} The user's query string is passed to the OpenAI \texttt{text-embedding-3-small} model, which returns a 1536-number vector $\mathbf{q}$.
+
+\item \emph{Similarity.} Cosine similarity is computed between $\mathbf{q}$ and each of the 59 pre-computed region vectors $\mathbf{r}_i$. The result is a list of 59 similarity values $s_i = \inner{\mathbf{r}_i}{\mathbf{q}}$.
+
+\item \emph{Ranking.} The 59 values are sorted in descending order and the top five matched regions are retained.
+
+\item \emph{Lookup.} For each of the five matched regions, the signature grape list is read from \texttt{region\_grapes.json}.
+
+\item \emph{Alias resolution.} Each grape in each signature list is checked against the 12-entry alias file. Regional spellings are substituted by canonical names for counting purposes; the regional spelling is preserved separately for the trace.
+
+\item \emph{Tallying.} For each canonical grape that appears in any signature list, the aggregator counts how many of the five matched regions name it.
+
+\item \emph{Selection.} The aggregator applies the three-mode rule: strong recurrence (one grape in $\geq 3$ regions $\rightarrow$ return that grape alone); multi-bullseye (two to four grapes each in $\geq 2$ regions $\rightarrow$ return those, capped at four); prism (otherwise $\rightarrow$ return top two to three by similarity-weighted score).
+
+\item \emph{Coherence classification.} The coherence detector counts the cluster labels of the five matched regions. If four or more share a cluster, the response is classified bullseye for that cluster; otherwise it is classified prism.
+
+\item \emph{Framing and display.} The framing sentence is selected from \texttt{cluster\_framings.json} based on the coherence detector's verdict. The grape names and framing sentence are displayed; the verification prompt and trace-fold disclosure are rendered. The trace fold, when expanded, presents the per-grape detail described in the previous section.
+\end{enumerate}
+
+The framework presents these nine steps as the entire procedure. There are no hidden steps, no model-generated framings, no fuzzy lookups, no rerankings, and no learning. The same query, submitted twice, returns the same response.
+
+\section*{Further Reading}
+
+The companion documents extend this primer in three directions.
+
+The \emph{Region Resonances Methods Primer} provides the full plain-language treatment of embeddings, the unit sphere, cosine similarity, and the matcher itself --- material treated lightly in Section 2 above because Grape Resonances inherits the matcher unchanged.
+
+The \emph{Grape Resonances Technical Appendix} provides the mathematical framework for the aggregator and coherence detector, with pseudocode for both, and the formal treatment of alias resolution and the silent-skip path.
+
+The \emph{Grape Resonances Data Appendix} provides the corpus listings: the 59 regions and their cluster labels, the 101 canonical grapes, the 12 alias entries, the ten framing sentences, and the eleven silent-skipped grapes. The Data Appendix is also where the per-region signature curations are recorded in full.
+
+\section*{References}
+
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+\item Manning, C. D., Raghavan, P. \& Sch\"utze, H. (2008). \emph{Introduction to Information Retrieval}. Cambridge University Press. Chapters 6 (vector space model) and 14 (vector classification).
+\item Mikolov, T., Chen, K., Corrado, G. \& Dean, J. (2013). Efficient estimation of word representations in vector space. \emph{arXiv:1301.3781}.
+\item OpenAI (2024). New embedding models and API updates. Technical announcement covering \texttt{text-embedding-3-small} and \texttt{text-embedding-3-large}.
+\item Reimers, N. \& Gurevych, I. (2019). Sentence-BERT: Sentence embeddings using Siamese BERT-networks. In \emph{Proceedings of EMNLP-IJCNLP}, 3982--3992.
+\item Robinson, J., Harding, J. \& Vouillamoz, J. (2012). \emph{Wine Grapes: A Complete Guide to 1,368 Vine Varieties}. Allen Lane.
+\item Salton, G., Wong, A. \& Yang, C. S. (1975). A vector space model for automatic indexing. \emph{Communications of the ACM}, 18(11), 613--620.
+\end{itemize}
+
+\end{document}
